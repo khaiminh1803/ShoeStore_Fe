@@ -1,0 +1,321 @@
+import { StyleSheet, Text, View, Pressable, TouchableOpacity, Image, Modal, FlatList, ScrollView, TextInput, ToastAndroid } from 'react-native'
+import React, { useState, useContext } from 'react'
+import CheckoutModal from './CheckoutModal';
+import { Picker } from '@react-native-picker/picker';
+import { AppContext } from '../utils/AppContext';
+import ItemCheckout from './item/ItemCheckout';
+import AxiosInstance from '../utils/AxiosIntance'
+
+
+
+
+const Checkout = (props) => {
+    const { navigation, route } = props
+    const { params } = route
+    const { infoUser } = useContext(AppContext)
+    const [address, setAddress] = useState(infoUser.address);
+    const [email, setEmail] = useState(infoUser.email);
+    const [phonenumber, setPhoneNumber] = useState(infoUser.phonenumber);
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cod');
+    const [isModalVisible, setisModalVisible] = useState(false);
+    const dataNe = params.selectedItems
+    const changeModalVisible = (bool) => {
+        setisModalVisible(bool)
+    }
+
+
+    const handlesCheckoutPress = async () => {
+        console.log(infoUser._id,email, phonenumber, address, dataNe, selectedPaymentMethod, params.totalPrice);
+        try {
+            const response = await AxiosInstance().post("/products/order", { userId: infoUser._id, email: email, phonenumber: phonenumber, shippingAddress: address, selectedItems: dataNe, paymentMethod: selectedPaymentMethod, totalPrice: params.totalPrice })
+            console.log(response)
+            if (response.result == true) {
+                ToastAndroid.show("Thanh toán thành công", ToastAndroid.SHORT)
+                changeModalVisible(true)
+            }
+        } catch (error) {
+          ToastAndroid.show("Thanh toán thất bại", ToastAndroid.SHORT)
+        }
+    }
+
+
+    return (
+        <View style={styles.container}>
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => { navigation.goBack() }}>
+                    <Image source={require('../media/icon_button/back.png')}
+                        style={{ width: 44, height: 44 }} />
+                </TouchableOpacity>
+                <Text style={{
+                    textAlign: 'center', fontFamily: 'Airbnb Cereal App'
+                    , fontSize: 16, lineHeight: 20,
+                    color: '#1A2530', fontWeight: 'bold'
+                }}>Checkout</Text>
+                <View style={{ width: 44, height: 44 }}>
+                </View>
+            </View>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 250 }}>
+                <View style={styles.information}>
+                    <Text style={{
+                        color: '#1A2530', fontSize: 14,
+                        lineHeight: 20, fontWeight: '500',
+                        fontFamily: 'Airbnb-Cereal-App-Bold'
+                    }}>Contact Information</Text>
+                    <View style={styles.viewEmail}>
+                        <Image source={require('../media/icon_button/mail.png')} />
+                        <View style={{ marginLeft: 10 }}>
+                            <TextInput style={styles.edtEmail}
+                                value={email}
+                                onChangeText={setEmail} />
+                            <Text style={styles.txtEmail}>Email</Text>
+                        </View>
+                        <TouchableOpacity style={{ marginLeft: 'auto' }} onPress={() => { console.log(email); }}>
+                            <Image style={styles.btnEdit} source={require('../media/icon_button/edit2.png')} />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.viewEmail}>
+                        <Image source={require('../media/icon_button/phone.png')} />
+                        <View style={{ marginLeft: 10 }}>
+                            <TextInput style={styles.edtEmail}
+                                value={phonenumber}
+                                onChangeText={setPhoneNumber} />
+                            <Text style={styles.txtEmail}>Phone</Text>
+                        </View>
+                        <TouchableOpacity style={{ marginLeft: 'auto' }} onPress={() => { console.log(phonenumber); }}>
+                            <Image style={styles.btnEdit} source={require('../media/icon_button/edit2.png')} />
+                        </TouchableOpacity>
+                    </View>
+
+                    <View>
+                        <Text style={styles.txtAddress}>Address</Text>
+                        <View style={styles.viewAddress}>
+                            <Text style={styles.edtAddress}>{address}</Text>
+                            <TouchableOpacity>
+                                <Image source={require('../media/icon_button/show.png')} />
+                            </TouchableOpacity>
+                        </View>
+                        <Image style={{
+                            width: 295, height: 101,
+                            borderRadius: 16, marginTop: 10
+                        }}
+                            source={require('../media/icon_button/map.png')} />
+                    </View>
+
+                    <View>
+                        <Text style={styles.txtAddress}>Payment Method</Text>
+                        {/* <View style={styles.viewEmail}>
+                            <Image source={require('../media/icon_button/paypal.png')} />
+                            <View style={{ marginLeft: 10 }}>
+                                <Text style={styles.edtEmail}>Paypal Card</Text>
+                                <Text style={styles.txtEmail}>**** **** 0696 4629</Text>
+                            </View>
+                            <TouchableOpacity style={{ marginLeft: 'auto' }}>
+                                <Image style={styles.btnEdit} source={require('../media/icon_button/show.png')} />
+                            </TouchableOpacity>
+                        </View> */}
+
+                        <Picker
+
+                            selectedValue={selectedPaymentMethod}
+                            onValueChange={(itemValue, itemIndex) =>
+                                setSelectedPaymentMethod(itemValue)
+                            }>
+                            <Picker.Item label="Cod" value="Cod" />
+                            <Picker.Item label="MoMo" value="Momo" />
+                            <Picker.Item label="ZaloPay" value="Zalopay" />
+                        </Picker>
+
+
+
+                    </View>
+                </View>
+                {dataNe.map(item => (
+                    <ItemCheckout key={item._id} dulieu={item} />
+                ))}
+            </ScrollView>
+            <View style={styles.popup}>
+                <View style={styles.viewSubtotal}>
+                    <Text style={styles.txtSubtotal}>Subtotal</Text>
+                    <Text style={styles.txtCost1}>${params.totalPrice}</Text>
+                </View>
+                <View style={styles.viewShopping}>
+                    <Text style={styles.txtSubtotal}>Shipping Fee</Text>
+                    <Text style={styles.txtCost1}>$40</Text>
+                </View>
+                <Image source={require('../media/icon_button/line.png')} style={{ marginTop: 20 }} />
+                <View style={styles.viewTotalcost}>
+                    <Text style={styles.txtTotalCost}>Total Cost</Text>
+                    <Text style={styles.txtCost3}>${params.totalPrice + 40}</Text>
+                </View>
+                <Pressable style={styles.btnSubmit} onPress={handlesCheckoutPress} >
+                    <Text style={styles.btnSubmitLabel}>Payment</Text>
+                    <Modal transparent={true}
+                        animationType='fade'
+                        visible={isModalVisible}
+                        onRequestClose={() => changeModalVisible(false)}>
+                        <CheckoutModal
+                            changeModalVisible={changeModalVisible}
+                        />
+                    </Modal>
+                </Pressable>
+                {/* <Pressable style={styles.btnSubmit} onPress={handlesCheckoutPress} >
+                    <Text style={styles.btnSubmitLabel}>Payment</Text>
+                </Pressable> */}
+            </View>
+        </View>
+    )
+}
+
+export default Checkout
+
+const styles = StyleSheet.create({
+    btnSubmitLabel: {
+        fontSize: 18,
+        lineHeight: 24,
+        letterSpacing: 0.12,
+        color: '#ffffff',
+        fontFamily: 'Airbnb-Cereal-App-Bold'
+    },
+    btnSubmit: {
+        marginTop: 30,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 25,
+        backgroundColor: '#5b9ee1',
+        height: 60,
+        paddingVertical: 13,
+        paddingHorizontal: 24,
+    },
+    txtCost3: {
+        color: '#1A2530',
+        fontSize: 20,
+        lineHeight: 24,
+        fontWeight: '500',
+        fontFamily: 'Airbnb-Cereal-App-Medium'
+    },
+    txtTotalCost: {
+        color: '#1A2530',
+        fontSize: 16,
+        lineHeight: 20,
+        fontWeight: '500',
+        fontFamily: 'Airbnb-Cereal-App-Medium'
+    },
+    viewTotalcost: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 20,
+        alignItems: 'center'
+    },
+    viewShopping: {
+        marginTop: 15,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
+    txtCost1: {
+        color: '#1A2530',
+        fontSize: 18,
+        lineHeight: 24,
+        fontWeight: '500',
+        fontFamily: 'Airbnb-Cereal-App-Medium'
+    },
+    txtSubtotal: {
+        fontSize: 16,
+        lineHeight: 20,
+        fontWeight: '500',
+        fontFamily: 'Airbnb-Cereal-App-Medium',
+        color: '#707B81'
+    },
+    viewSubtotal: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        height: 20
+    },
+    popup: {
+        backgroundColor: '#ffffff',
+        // backgroundColor: 'red',
+        height: 244,
+        borderBottomLeftRadius: 20,
+        borderBottomRightRadius: 20,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        position: 'absolute', // Use absolute positioning
+        bottom: 0, // Anchor to the bottom of the container
+        left: 0, // Align to the left edge of the container
+        right: 0, // Stretch to the right edge of the container
+    },
+    edtAddress: {
+        color: '#707B81',
+        fontSize: 12,
+        lineHeight: 16,
+        fontWeight: '400',
+        fontFamily: 'Airbnb-Cereal-App-Medium',
+
+    },
+    viewAddress: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 10
+    },
+    txtAddress: {
+        color: '#1A2530',
+        fontSize: 14,
+        lineHeight: 20,
+        fontWeight: '500',
+        fontFamily: 'Airbnb-Cereal-App-Bold',
+        marginTop: 10
+    },
+    txtEmail: {
+        color: '#707B81',
+        fontSize: 12,
+        lineHeight: 16,
+        fontWeight: '400',
+        fontFamily: 'Airbnb-Cereal-App-Medium',
+        marginTop: 1
+    },
+    edtEmail: {
+        fontSize: 14,
+        lineHeight: 20,
+        fontWeight: '400',
+        fontFamily: 'Airbnb-Cereal-App-Medium',
+        color: '#1A2530',
+        // backgroundColor:'red',
+        paddingVertical: 0,
+        paddingHorizontal: 0,
+        marginBottom: 0
+    },
+    viewEmail: {
+        flexDirection: 'row',
+        width: 286,
+        height: 40,
+        alignItems: 'center',
+        // backgroundColor: 'blue',
+        marginTop: 15
+    },
+    information: {
+        width: 335,
+        height: 425,
+        // height: 450,
+        paddingHorizontal: 16,
+        paddingVertical: 20,
+        // backgroundColor: 'grey',
+        backgroundColor: '#ffffff',
+        alignSelf: 'center',
+        borderRadius: 10,
+        marginTop: 10
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 16
+    },
+    container: {
+        flex: 1,
+        paddingVertical: 10,
+        backgroundColor: '#f8f9fa',
+        flexDirection: 'column',
+    }
+})
