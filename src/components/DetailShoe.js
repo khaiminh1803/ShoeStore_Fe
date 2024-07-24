@@ -1,8 +1,9 @@
 import { StyleSheet, Text, View, TouchableOpacity, Image, Pressable, ToastAndroid, ActivityIndicator, ScrollView, Dimensions } from 'react-native'
 import React, { useEffect, useState, useContext } from 'react'
 import AxiosInstance from '../utils/AxiosIntance'
-import { SliderBox } from "react-native-image-slider-box";
 import { AppContext } from '../utils/AppContext';
+import { formatCurrency } from '../utils/GlobalFunction'
+
 
 const DetailShoe = (props) => {
   const { navigation, route } = props
@@ -89,17 +90,17 @@ const DetailShoe = (props) => {
       <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => {navigation.navigate('Home')}}>
-            <Image source={require('../media/icon_button/back.png')}
-              style={{ width: 44, height: 44 }} />
+            <Image source={require('../media/icon_button/arrow.png')}
+              style={{ width: 30, height: 30 }} />
           </TouchableOpacity>
           <Text style={{
             textAlign: 'center', fontFamily: 'Airbnb Cereal App'
-            , fontSize: 16, lineHeight: 20,
-            color: '#1A2530', fontWeight: 'bold'
+            , fontSize: 20, 
+            color: 'white', fontWeight: 'bold'
           }}>Men's Shoes</Text>
           <Pressable onPress={nvgCart} >
-            <Image source={require('../media/icon_button/cart.png')}
-              style={{ width: 44, height: 44 }} />
+            <Image source={require('../media/icon_button/bag.png')}
+              style={{ width: 30, height: 30 }} />
           </Pressable>
         </View>
         <View style={styles.wrap}>
@@ -131,10 +132,10 @@ const DetailShoe = (props) => {
             )
           }
         </View>
-        <View>
+        <View style={{paddingHorizontal: 16}}>
           <Text style={styles.category}>BEST SELLER</Text>
           <Text style={styles.name}>{name}</Text>
-          <Text style={styles.price}>${price}</Text>
+          <Text style={styles.price}>{formatCurrency(price)}</Text>
           <Text style={styles.description}>{description}</Text>
         </View>
         <Text style={styles.gallery}>Gallery</Text>
@@ -182,7 +183,7 @@ const DetailShoe = (props) => {
         <View style={styles.footer}>
           <View>
             <Text style={styles.footerPrice}>Price</Text>
-            <Text style={styles.price}>${price}</Text>
+            <Text style={styles.price}>{formatCurrency(price)}</Text>
           </View>
           <Pressable style={styles.btnLoginBorder} onPress={addToCart}>
             <Text style={styles.btnLoginLabel}>Add to cart</Text>
@@ -213,6 +214,7 @@ const styles = StyleSheet.create({
 
   },
   wrap: {
+    marginTop: 10,
     width: 350,
     height: 220,
     alignSelf: 'center',
@@ -254,7 +256,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 30
+    marginTop: 30, 
+    paddingHorizontal: 16
   },
   sizeActive: {
     backgroundColor: '#5b9ee1',
@@ -291,7 +294,8 @@ const styles = StyleSheet.create({
   viewSize: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 10
+    marginTop: 10,
+    paddingHorizontal: 16
   },
   galleryImage: {
     width: 56,
@@ -301,7 +305,8 @@ const styles = StyleSheet.create({
   },
   viewGallery: {
     flexDirection: 'row',
-    marginTop: 14
+    marginTop: 14,
+    paddingHorizontal: 16
   },
   gallery: {
     fontSize: 18,
@@ -309,7 +314,8 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     color: '#1A2530',
     fontFamily: 'Airbnb-Cereal-App-Medium',
-    marginTop: 10
+    marginTop: 10,
+    marginLeft: 16
   },
   description: {
     width: 310,
@@ -352,12 +358,15 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: '#5b9ee1',
+    height: 50,
+    paddingHorizontal: 10
   },
   container: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    // paddingHorizontal: 16,
+    // paddingVertical: 10,
     backgroundColor: '#FFFFFF',
   },
 })

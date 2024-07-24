@@ -1,6 +1,9 @@
 import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native'
 import React from 'react'
 import BouncyCheckbox from "react-native-bouncy-checkbox";
+import { formatCurrency } from '../../utils/GlobalFunction'
+
+
 const ItemCart = (props) => {
   const { dulieu, onDelete, onIncrease, onDecrease, onSelect, isSelected } = props
   return (
@@ -11,10 +14,10 @@ const ItemCart = (props) => {
         fillColor="#5b9ee1"
         unFillColor="#FFFFFF"
         style={{ width: 20, height: 20, alignSelf: 'center', marginRight: 15 }} />
-      <Image style={styles.imgShoe} source={{ uri: dulieu.product.image[0] }} />
+      <Image style={styles.imgShoe} source={{ uri: dulieu?.product.image[0] }} />
       <View style={{ marginStart: 15, marginTop: 5 }}>
         <Text style={styles.nameShoe}>{dulieu.product.name}</Text>
-        <Text style={styles.priceShoe}>{dulieu.product.price}</Text>
+        <Text style={styles.priceShoe}>{formatCurrency(dulieu.product.price)}</Text>
         <View style={styles.viewBtn}>
           <TouchableOpacity onPress={onDecrease}>
             <Image style={styles.imgBtn} source={require('../../media/icon_button/minus.png')} />

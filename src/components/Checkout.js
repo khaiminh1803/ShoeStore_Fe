@@ -1,60 +1,139 @@
-import { StyleSheet, Text, View, Pressable, TouchableOpacity, Image, Modal, FlatList, ScrollView, TextInput, ToastAndroid } from 'react-native'
+import { StyleSheet, Text, View, Pressable, TouchableOpacity, Image, Modal, ScrollView, TextInput, ToastAndroid, Platform, DeviceEventEmitter, NativeModules, NativeEventEmitter } from 'react-native'
 import React, { useState, useContext } from 'react'
 import CheckoutModal from './CheckoutModal';
 import { Picker } from '@react-native-picker/picker';
 import { AppContext } from '../utils/AppContext';
 import ItemCheckout from './item/ItemCheckout';
 import AxiosInstance from '../utils/AxiosIntance'
+import { formatCurrency } from '../utils/GlobalFunction'
 
+import RNMomosdk from 'react-native-momosdk';
+// const RNMomosdkModule = NativeModules.RNMomosdk;
+// const EventEmitter = new NativeEventEmitter(RNMomosdkModule);
 
 
 
 const Checkout = (props) => {
     const { navigation, route } = props
     const { params } = route
-    const { infoUser } = useContext(AppContext)
+    const { infoUser, dataOrder, setdataOrder, selectedVoucher } = useContext(AppContext)
     const [address, setAddress] = useState(infoUser.address);
+    const [addressProvince, setaddressProvince] = useState("Tp. Hồ Chí Minh")
     const [email, setEmail] = useState(infoUser.email);
     const [phonenumber, setPhoneNumber] = useState(infoUser.phonenumber);
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cod');
     const [isModalVisible, setisModalVisible] = useState(false);
-    const dataNe = params.selectedItems
+    const dataNe = params?.selectedItems
+    const payment = ["Momo", "Tiền mặt"]
+    const [paymentMethod, setpaymentMethod] = useState(null)
+    const subtotalPrice = params.totalPrice
+    let shippingFee = addressProvince ? (addressProvince === 'Tp. Hồ Chí Minh' ? 40000 : 60000) : 0;
+
+    // const shippingFee = 40000
+    const voucherCode = selectedVoucher?.code || '';
+    const voucherValue = selectedVoucher?.value || 0;
+
+    const totalPrice = subtotalPrice + shippingFee - voucherValue
+
+    // momo
+    const merchantname = "CGV Cinemas";
+    const merchantcode = "CGV01";
+    const merchantNameLabel = "Nhà cung cấp";
+    const billdescription = "Thanh toán hóa đơn";
+    const amount = 50000;
+    const enviroment = "0"; //"0": SANBOX , "1": PRODUCTION
+
+    const handleClickMomo = async () => {
+        let jsonData = {};
+        jsonData.enviroment = enviroment; //SANBOX OR PRODUCTION
+        jsonData.action = "gettoken"; //DO NOT EDIT
+        jsonData.merchantname = merchantname; //edit your merchantname here
+        jsonData.merchantcode = merchantcode; //edit your merchantcode here
+        jsonData.merchantnamelabel = merchantNameLabel;
+        jsonData.description = billdescription;
+        jsonData.amount = totalPrice;//order total amount
+        jsonData.orderId = "ID20181123192300";
+        jsonData.orderLabel = "Ma don hang";
+        jsonData.appScheme = "momocgv20170101";// iOS App Only , match with Schemes Indentify from your  Info.plist > key URL types > URL Schemes
+        console.log("data_request_payment " + JSON.stringify(jsonData));
+        if (Platform.OS === 'android') {
+            let dataPayment = await RNMomosdk.requestPayment(jsonData);
+            momoHandleResponse(dataPayment);
+        } else {
+            RNMomosdk.requestPayment(jsonData);
+        }
+    }
+
+    const momoHandleResponse = async (response) => {
+        try {
+            console.log(response);
+            if (response && response.status == 0) {
+                //SUCCESS continue to submit momoToken,phonenumber to server
+                let fromapp = response.fromapp; //ALWAYS:: fromapp == momotransfer
+                let momoToken = response.data;
+                let phonenumber = response.phonenumber;
+                let message = response.message;
+
+            } else {
+                //let message = response.message;
+                //Has Error: show message here
+            }
+        } catch (ex) { }
+    }
     const changeModalVisible = (bool) => {
         setisModalVisible(bool)
     }
 
+    const clickPayment = (paymentname) => {
+        console.log("Selected payment:", paymentname);
+        console.log("clickne");
+        setpaymentMethod(paymentname)
+    }
+    const handleClickPickVoucher = () => {
+        console.log("Voucher ne");
+        navigation.navigate('Voucher', { subtotalPrice: subtotalPrice })
+    }
 
     const handlesCheckoutPress = async () => {
-        console.log(infoUser._id,email, phonenumber, address, dataNe, selectedPaymentMethod, params.totalPrice);
+        console.log(infoUser._id, email, phonenumber, address, dataNe, selectedPaymentMethod, totalPrice);
         try {
-            const response = await AxiosInstance().post("/products/order", { userId: infoUser._id, email: email, phonenumber: phonenumber, shippingAddress: address, selectedItems: dataNe, paymentMethod: selectedPaymentMethod, totalPrice: params.totalPrice })
+            const response = await AxiosInstance().post("/products/order", { userId: infoUser._id, email: email, phonenumber: phonenumber, shippingAddress: address, selectedItems: dataNe, paymentMethod: paymentMethod, totalPrice: totalPrice })
             console.log(response)
             if (response.result == true) {
                 ToastAndroid.show("Thanh toán thành công", ToastAndroid.SHORT)
+                // setdataOrder([...dataOrder, response.order]); // Thêm order mới vào dataOrder
+                setdataOrder(prevOrders => [...prevOrders, response.order]);
                 changeModalVisible(true)
             }
         } catch (error) {
-          ToastAndroid.show("Thanh toán thất bại", ToastAndroid.SHORT)
+            ToastAndroid.show("Thanh toán thất bại", ToastAndroid.SHORT)
         }
     }
 
+    const handlePayment = () => {
+        if (paymentMethod === "Tiền mặt") {
+            handlesCheckoutPress();
+        } else if (paymentMethod === "Momo") {
+            handleClickMomo();
+        }
+    }
 
     return (
         <View style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => { navigation.goBack() }}>
-                    <Image source={require('../media/icon_button/back.png')}
-                        style={{ width: 44, height: 44 }} />
+                    <Image source={require('../media/icon_button/arrow.png')}
+                        style={{ width: 30, height: 30 }} />
                 </TouchableOpacity>
                 <Text style={{
                     textAlign: 'center', fontFamily: 'Airbnb Cereal App'
-                    , fontSize: 16, lineHeight: 20,
-                    color: '#1A2530', fontWeight: 'bold'
+                    , fontSize: 20,
+                    color: 'white', fontWeight: 'bold'
                 }}>Checkout</Text>
-                <View style={{ width: 44, height: 44 }}>
+                <View style={{ width: 30, height: 30 }}>
                 </View>
             </View>
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 250 }}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 155 }}>
                 <View style={styles.information}>
                     <Text style={{
                         color: '#1A2530', fontSize: 14,
@@ -69,7 +148,7 @@ const Checkout = (props) => {
                                 onChangeText={setEmail} />
                             <Text style={styles.txtEmail}>Email</Text>
                         </View>
-                        <TouchableOpacity style={{ marginLeft: 'auto' }} onPress={() => { console.log(email); }}>
+                        <TouchableOpacity style={{ marginLeft: 'auto' }} onPress={handleClickMomo}>
                             <Image style={styles.btnEdit} source={require('../media/icon_button/edit2.png')} />
                         </TouchableOpacity>
                     </View>
@@ -89,66 +168,89 @@ const Checkout = (props) => {
                     <View>
                         <Text style={styles.txtAddress}>Address</Text>
                         <View style={styles.viewAddress}>
-                            <Text style={styles.edtAddress}>{address}</Text>
+                            <TextInput style={styles.edtAddress} value={address} onChangeText={setAddress} />
                             <TouchableOpacity>
                                 <Image source={require('../media/icon_button/show.png')} />
                             </TouchableOpacity>
+                        </View>
+                        <View style={{ borderRadius: 20, backgroundColor: '#E9EDEF', paddingHorizontal: 20 }}>
+                            <Picker
+                                mode='dropdown'
+                                selectedValue={addressProvince}
+                                onValueChange={(itemValue, itemIndex) =>
+                                    setaddressProvince(itemValue)
+                                }>
+                                <Picker.Item label="Tp. Hồ Chí Minh" value="Tp. Hồ Chí Minh" />
+                                <Picker.Item label="Other" value="Other" />
+                                
+                            </Picker>
                         </View>
                         <Image style={{
                             width: 295, height: 101,
                             borderRadius: 16, marginTop: 10
                         }}
                             source={require('../media/icon_button/map.png')} />
+                       
                     </View>
 
-                    <View>
-                        <Text style={styles.txtAddress}>Payment Method</Text>
-                        {/* <View style={styles.viewEmail}>
-                            <Image source={require('../media/icon_button/paypal.png')} />
-                            <View style={{ marginLeft: 10 }}>
-                                <Text style={styles.edtEmail}>Paypal Card</Text>
-                                <Text style={styles.txtEmail}>**** **** 0696 4629</Text>
-                            </View>
-                            <TouchableOpacity style={{ marginLeft: 'auto' }}>
-                                <Image style={styles.btnEdit} source={require('../media/icon_button/show.png')} />
-                            </TouchableOpacity>
-                        </View> */}
 
-                        <Picker
-
-                            selectedValue={selectedPaymentMethod}
-                            onValueChange={(itemValue, itemIndex) =>
-                                setSelectedPaymentMethod(itemValue)
-                            }>
-                            <Picker.Item label="Cod" value="Cod" />
-                            <Picker.Item label="MoMo" value="Momo" />
-                            <Picker.Item label="ZaloPay" value="Zalopay" />
-                        </Picker>
-
-
-
-                    </View>
                 </View>
                 {dataNe.map(item => (
                     <ItemCheckout key={item._id} dulieu={item} />
                 ))}
+                <View style={{ padding: 10, marginTop: 5, backgroundColor: '#FFFfFf' }}>
+                    <View style={styles.viewSubtotal}>
+                        <Text style={styles.txtSubtotal}>Subtotal</Text>
+                        <Text style={styles.txtCost1}>{formatCurrency(subtotalPrice)}</Text>
+                    </View>
+                    <View style={styles.viewShopping}>
+                        <Text style={styles.txtSubtotal}>Shipping Fee</Text>
+                        <Text style={styles.txtCost1}>{formatCurrency(shippingFee)}</Text>
+                    </View>
+                    {voucherValue > 0 && (
+                        <View style={styles.viewShopping}>
+                            <Text style={styles.txtSubtotal}>Voucher value</Text>
+                            <Text style={styles.txtCost1}>-{formatCurrency(voucherValue)}</Text>
+                        </View>
+                    )}
+
+                    <Image source={require('../media/icon_button/line.png')} style={{ marginTop: 20, alignSelf: 'center' }} />
+                    <View style={styles.viewTotalcost}>
+                        <Text style={styles.txtTotalCost}>Total Cost</Text>
+                        <Text style={styles.txtCost3}>{formatCurrency((totalPrice))}</Text>
+                    </View>
+                </View>
+                <View style={{ flexDirection: 'row', backgroundColor: '#FFFFFF', alignItems: 'center', marginTop: 5, paddingVertical: 10, paddingHorizontal: 5 }}>
+                    <Image source={require('../media/icon_button/voucher.png')} />
+                    <Text style={[styles.txtSubtotal, { marginStart: 10 }]}>Voucher</Text>
+                    <TouchableOpacity style={{ marginLeft: 'auto' }} onPress={handleClickPickVoucher}>
+                        <Text style={styles.txtSubtotal}>{selectedVoucher && selectedVoucher != null ? voucherCode : 'Pick voucher'}</Text>
+                    </TouchableOpacity>
+                </View>
             </ScrollView>
             <View style={styles.popup}>
-                <View style={styles.viewSubtotal}>
-                    <Text style={styles.txtSubtotal}>Subtotal</Text>
-                    <Text style={styles.txtCost1}>${params.totalPrice}</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    {
+                        payment.map((item, index) => (
+                            <TouchableOpacity
+                                key={index}
+                                onPress={() => clickPayment(item)}
+                                style={[
+                                    styles.borderCategory,
+                                    { backgroundColor: paymentMethod === item ? '#5B9EE1' : '#E9EDEF' },
+                                ]}
+                            >
+                                <Text style={[
+                                    styles.txtCategory,
+                                    { color: paymentMethod === item ? '#FFFFFF' : '#707B81' },
+                                ]}>{item}</Text>
+                            </TouchableOpacity>
+                        ))
+                    }
                 </View>
-                <View style={styles.viewShopping}>
-                    <Text style={styles.txtSubtotal}>Shipping Fee</Text>
-                    <Text style={styles.txtCost1}>$40</Text>
-                </View>
-                <Image source={require('../media/icon_button/line.png')} style={{ marginTop: 20 }} />
-                <View style={styles.viewTotalcost}>
-                    <Text style={styles.txtTotalCost}>Total Cost</Text>
-                    <Text style={styles.txtCost3}>${params.totalPrice + 40}</Text>
-                </View>
-                <Pressable style={styles.btnSubmit} onPress={handlesCheckoutPress} >
-                    <Text style={styles.btnSubmitLabel}>Payment</Text>
+                {/* <Text style={{ textAlign: 'center', marginBottom: 10, marginTop: 10 }}>Phương thức thanh toán khác</Text> */}
+                <Pressable style={styles.btnSubmit} onPress={handlePayment} >
+                    <Text style={styles.btnSubmitLabel}>Payment - {totalPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })} </Text>
                     <Modal transparent={true}
                         animationType='fade'
                         visible={isModalVisible}
@@ -169,6 +271,21 @@ const Checkout = (props) => {
 export default Checkout
 
 const styles = StyleSheet.create({
+    txtCategory: {
+        fontSize: 16,
+        lineHeight: 20,
+        fontWeight: '500',
+        color: '#707B81'
+    },
+    borderCategory: {
+        width: 170,
+        height: 48,
+        padding: 5,
+        backgroundColor: '#E9EDEF',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 10
+    },
     btnSubmitLabel: {
         fontSize: 18,
         lineHeight: 24,
@@ -177,7 +294,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Airbnb-Cereal-App-Bold'
     },
     btnSubmit: {
-        marginTop: 30,
+        marginTop: 10,
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 25,
@@ -235,7 +352,7 @@ const styles = StyleSheet.create({
     popup: {
         backgroundColor: '#ffffff',
         // backgroundColor: 'red',
-        height: 244,
+        height: 140,
         borderBottomLeftRadius: 20,
         borderBottomRightRadius: 20,
         paddingHorizontal: 20,
@@ -296,11 +413,11 @@ const styles = StyleSheet.create({
     },
     information: {
         width: 335,
-        height: 425,
+        height: 410,
         // height: 450,
         paddingHorizontal: 16,
         paddingVertical: 20,
-        // backgroundColor: 'grey',
+        // backgroundColor: 'red',
         backgroundColor: '#ffffff',
         alignSelf: 'center',
         borderRadius: 10,
@@ -310,12 +427,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 16
+        height: 50,
+        paddingHorizontal: 10,
+        backgroundColor: '#5b9ee1'
     },
     container: {
         flex: 1,
-        paddingVertical: 10,
         backgroundColor: '#f8f9fa',
-        flexDirection: 'column',
     }
 })

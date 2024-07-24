@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image } from 'react-native'
+import { StyleSheet, Text, View, Image, StatusBar } from 'react-native'
 import React, { useContext } from 'react'
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -18,11 +18,16 @@ import Onboard1 from '../components/Onboard1';
 import Onboard2 from '../components/Onboard2';
 import Onboard3 from '../components/Onboard3';
 import Checkout from '../components/Checkout';
-
+import Setting from '../components/Setting';
+import Notification from '../components/Notification';
+import DetailOrder from '../components/DetailOrder';
+import History from '../components/History';
+import Voucher from '../components/Voucher';
 // welcome, login, register stack
 const Stack = createNativeStackNavigator()
 const User = () => {
     return (
+
         <Stack.Navigator initialRouteName='Welcome' screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Welcome" component={Welcome} />
             <Stack.Screen name="Onboard1" component={Onboard1} />
@@ -46,7 +51,7 @@ const User = () => {
 const Product = ({ navigation, route }) => {
     useLayoutEffect(() => {
         const routeName = getFocusedRouteNameFromRoute(route) ?? "Home";
-        if (routeName === "DetailShoe" || routeName === "Cart" || routeName === "Checkout") {
+        if (routeName === "DetailShoe" || routeName === "Cart" || routeName === "Checkout" || routeName === "Voucher") {
             navigation.setOptions({ tabBarStyle: { display: 'none' } });
         } else {
             navigation.setOptions({
@@ -58,6 +63,8 @@ const Product = ({ navigation, route }) => {
                     bottom: 0,
                     right: 0,
                     left: 0,
+                    // backgroundColor: '#0099cc'
+
                 }
             });
         }
@@ -69,9 +76,30 @@ const Product = ({ navigation, route }) => {
             <Stack.Screen name="DetailShoe" component={DetailShoe} />
             <Stack.Screen name="Cart" component={Cart} />
             <Stack.Screen name="Checkout" component={Checkout} />
+            <Stack.Screen name="Voucher" component={Voucher} />
         </Stack.Navigator>
     );
 };
+
+const Remaining = () => {
+    return (
+        <Stack.Navigator initialRouteName='Setting' screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Setting" component={Setting} />
+            <Stack.Screen name="Profile" component={Profile} />
+            <Stack.Screen name="History" component={History} />
+            <Stack.Screen name="DetailOrder" component={DetailOrder} />
+        </Stack.Navigator>
+    )
+}
+
+// const Order = () => {
+//     return (
+//         <Stack.Navigator initialRouteName='Favourite' screenOptions={{ headerShown: false }}>
+//             <Stack.Screen name="Favourite" component={Favourite} />
+//             <Stack.Screen name="DetailOrder" component={DetailOrder} />
+//         </Stack.Navigator>
+//     )
+// }
 
 const Tab = createBottomTabNavigator()
 //home, cart, bill, profile
@@ -82,41 +110,49 @@ const Main = () => {
                 tabBarStyle: {
                     height: 60,
                     position: 'absolute',
-                    borderTopLeftRadius: 30,
-                    borderTopRightRadius: 30,
+                    borderTopLeftRadius: 20,
+                    borderTopRightRadius: 20,
                     bottom: 0,
                     right: 0,
                     left: 0,
+                    // backgroundColor: '#0099cc'
                 },
                 headerShown: false,
                 tabBarIcon: ({ focused }) => {
                     let source
                     if (route.name === 'Product') {
                         if (source = focused) {
-                            return <Image source={require('../media/icon_bottom_tab/home_active.png')} />
+                            return <Image source={require('../media/icon_bottom_tab/home_active.png')} style={{ width: 24, height: 24 }} />
                         } else {
-                            return <Image source={require('../media/icon_bottom_tab/home.png')} />
+                            return <Image source={require('../media/icon_bottom_tab/home.png')} style={{ width: 24, height: 24 }} />
                         }
 
-                    } //else if (route.name === 'Cart') {
-                    //     if (source = focused) {
-                    //         return <Image source={require('../media/icon_bottom_tab/cart_active.png')} />
-                    //     } else {
-                    //         return <Image source={require('../media/icon_bottom_tab/cart.png')} />
-                    //     }
-                    // }
-                    else if (route.name === 'Favourite') {
+                    } else if (route.name === 'Notification') {
                         if (source = focused) {
-                            return <Image source={require('../media/icon_bottom_tab/heart_active.png')} />
+                            return <Image source={require('../media/icon_bottom_tab/noti_active.png')} style={{ width: 24, height: 24 }} />
                         } else {
-                            return <Image source={require('../media/icon_bottom_tab/heart.png')} />
+                            return <Image source={require('../media/icon_bottom_tab/noti.png')} style={{ width: 24, height: 24 }} />
                         }
                     }
-                    else if (route.name === 'Profile') {
+                    else if (route.name === 'Cart') {
+                        return (
+                        <View style={{ width: 50, height: 50, backgroundColor: '#5b9ee1', borderRadius: 25, justifyContent: 'center', alignItems: 'center', marginBottom: 50 }}>
+                            <Image source={require('../media/icon_bottom_tab/plus.png')} style={{ width: 24, height: 24 }} />
+                        </View>)
+
+                    }
+                    else if (route.name === 'Favourite') {
                         if (source = focused) {
-                            return <Image source={require('../media/icon_bottom_tab/profile_active.png')} />
+                            return <Image source={require('../media/icon_bottom_tab/heart_active.png')} style={{ width: 24, height: 24 }} />
                         } else {
-                            return <Image source={require('../media/icon_bottom_tab/profile.png')} />
+                            return <Image source={require('../media/icon_bottom_tab/heart.png')} style={{ width: 24, height: 24 }} />
+                        }
+                    }
+                    else if (route.name === 'Remaining') {
+                        if (source = focused) {
+                            return <Image source={require('../media/icon_bottom_tab/profile_active.png')} style={{ width: 24, height: 24 }} />
+                        } else {
+                            return <Image source={require('../media/icon_bottom_tab/profile.png')} style={{ width: 24, height: 24 }} />
                         }
                     }
                 },
@@ -124,9 +160,10 @@ const Main = () => {
             })}
         >
             <Tab.Screen name="Product" component={Product} />
-            {/* <Tab.Screen name="Cart" component={Cart} /> */}
+            <Tab.Screen name="Notification" component={Notification} />
+            <Tab.Screen name="Cart" component={Cart} />
             <Tab.Screen name="Favourite" component={Favourite} />
-            <Tab.Screen name="Profile" component={Profile} />
+            <Tab.Screen name="Remaining" component={Remaining} />
         </Tab.Navigator>
     )
 }

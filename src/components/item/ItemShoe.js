@@ -1,5 +1,8 @@
 import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native'
 import React from 'react'
+import { formatCurrency } from '../../utils/GlobalFunction'
+
+
 
 const ItemShoe = (props) => {
     const {dulieu, navigation} = props
@@ -15,7 +18,7 @@ const ItemShoe = (props) => {
                     <Text style={styles.sex}>{dulieu?.category.name}</Text>
                     <Text numberOfLines={1} style={styles.name}>{dulieu?.name}</Text>
                     <View style={styles.viewRow}>
-                        <Text style={styles.name}>${dulieu?.price}</Text>
+                        <Text style={styles.name}>{formatCurrency(dulieu?.price)}</Text>
                         <Image source={require('../../media/icon_button/heartblack.png')}
                             style={styles.imgHeart} />
                     </View>

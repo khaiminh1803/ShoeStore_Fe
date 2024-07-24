@@ -8,7 +8,7 @@ const customAxios = (contentType = 'application/json') => {
         baseURL: 'http://192.168.1.9:3000/api/'
         // baseURL: 'http://192.168.1.13:3000/api/'
         // baseURL: 'http://192.168.1.22:3000/api/'
-        // baseURL: 'http://192.168.1.8:3000/api/'
+        // baseURL: 'http://192.168.1.6:3000/api/'
 
 
     });

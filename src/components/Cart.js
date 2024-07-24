@@ -3,6 +3,8 @@ import React, { useContext, useEffect, useState } from 'react'
 import { AppContext } from '../utils/AppContext'
 import AxiosInstance from '../utils/AxiosIntance'
 import ItemCart from './item/ItemCart'
+import { formatCurrency } from '../utils/GlobalFunction'
+
 
 const Cart = (props) => {
   const { navigation } = props
@@ -12,6 +14,7 @@ const Cart = (props) => {
   const [selectedItems, setselectedItems] = useState({})
   const [billPrice, setbillPrice] = useState(0)
   const [selectedItemsForCheckout, setSelectedItemsForCheckout] = useState([]);
+  const shippingFee = 40000
   const btnBack = () => {
     navigation.goBack()
   }
@@ -146,15 +149,15 @@ const Cart = (props) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={btnBack}>
-          <Image source={require('../media/icon_button/back.png')}
-            style={{ width: 44, height: 44 }} />
+          <Image source={require('../media/icon_button/arrow.png')}
+            style={{ width: 30, height: 30 }} />
         </TouchableOpacity>
         <Text style={{
           textAlign: 'center', fontFamily: 'Airbnb Cereal App'
-          , fontSize: 16, lineHeight: 20,
-          color: '#1A2530', fontWeight: 'bold'
+          , fontSize: 20, lineHeight: 20,
+          color: 'white', fontWeight: 'bold'
         }}>My Cart</Text>
-        <View style={{ width: 44, height: 44 }}>
+        <View style={{ width: 30, height: 30 }}>
         </View>
       </View>
 
@@ -184,16 +187,16 @@ const Cart = (props) => {
       <View style={styles.popup}>
         <View style={styles.viewSubtotal}>
           <Text style={styles.txtSubtotal}>Subtotal</Text>
-          <Text style={styles.txtCost1}>${calculateTotalPrice()}</Text>
+          <Text style={styles.txtCost1}>{formatCurrency(calculateTotalPrice())}</Text>
         </View>
         <View style={styles.viewShopping}>
           <Text style={styles.txtSubtotal}>Shipping Fee</Text>
-          <Text style={styles.txtCost1}>$40</Text>
+          <Text style={styles.txtCost1}>{formatCurrency(shippingFee)}</Text>
         </View>
         <Image source={require('../media/icon_button/line.png')} style={{ marginTop: 20 }} />
         <View style={styles.viewTotalcost}>
           <Text style={styles.txtTotalCost}>Total Cost</Text>
-          <Text style={styles.txtCost3}>${calculateTotalPrice() + 40}</Text>
+          <Text style={styles.txtCost3}>{formatCurrency((calculateTotalPrice() + shippingFee))}</Text>
         </View>
         <Pressable style={styles.btnSubmit} onPress={btnCheckout} >
           <Text style={styles.btnSubmitLabel}>Checkout</Text>
@@ -303,11 +306,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16
+    paddingHorizontal: 10,
+    backgroundColor: '#5b9ee1',
+    height: 50
   },
   container: {
     flex: 1,
-    paddingVertical: 10,
+    // paddingVertical: 10,
     backgroundColor: '#f8f9fa',
     flexDirection: 'column',
   }

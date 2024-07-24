@@ -46,6 +46,11 @@ import DetailShoe from './src/components/DetailShoe';
 import ItemCart from './src/components/item/ItemCart';
 import PaymentOptions from './src/components/PaymentOptions';
 import ItemCheckout from './src/components/item/ItemCheckout';
+import Setting from './src/components/Setting';
+import ModelTest from './src/components/ModelTest';
+import ItemOrder from './src/components/item/ItemOrder';
+import DetailOrder from './src/components/DetailOrder';
+import ItemVoucher from './src/components/item/ItemVoucher';
 
 
 
@@ -58,10 +63,17 @@ function App(): React.JSX.Element {
   return (
     <AppContextProvider>
       <NavigationContainer>
+        <StatusBar
+          barStyle="light-content" // or "dark-content"
+          backgroundColor="#5b9ee1" // Change this color as you like
+        />
         <AppNavigator />
       </NavigationContainer>
     </AppContextProvider>
-    
+    // <ItemVoucher/>
+    // <DetailOrder/>
+    // <ModelTest/>
+    // <ItemOrder/>
     // <PaymentOptions/>
     // <NavigationContainer>
     //   <Tab.Navigator

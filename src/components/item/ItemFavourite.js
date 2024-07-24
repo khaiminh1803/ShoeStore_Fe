@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native'
 import React from 'react'
+import { formatCurrency } from '../../utils/GlobalFunction'
 
 const ItemFavourite = (props) => {
   const { dulieu } = props
