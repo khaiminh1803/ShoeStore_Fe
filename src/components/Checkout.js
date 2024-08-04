@@ -16,15 +16,15 @@ import RNMomosdk from 'react-native-momosdk';
 const Checkout = (props) => {
     const { navigation, route } = props
     const { params } = route
-    const { infoUser, dataOrder, setdataOrder, selectedVoucher } = useContext(AppContext)
+    const { infoUser, dataOrder, setdataOrder, selectedVoucher, setselectedVoucher } = useContext(AppContext)
     const [address, setAddress] = useState(infoUser.address);
     const [addressProvince, setaddressProvince] = useState("Tp. Hồ Chí Minh")
     const [email, setEmail] = useState(infoUser.email);
     const [phonenumber, setPhoneNumber] = useState(infoUser.phonenumber);
-    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cod');
+    // const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cod');
     const [isModalVisible, setisModalVisible] = useState(false);
     const dataNe = params?.selectedItems
-    const payment = ["Momo", "Tiền mặt"]
+    const payment = ["Momo", "Cash"]
     const [paymentMethod, setpaymentMethod] = useState(null)
     const subtotalPrice = params.totalPrice
     let shippingFee = addressProvince ? (addressProvince === 'Tp. Hồ Chí Minh' ? 40000 : 60000) : 0;
@@ -32,6 +32,7 @@ const Checkout = (props) => {
     // const shippingFee = 40000
     const voucherCode = selectedVoucher?.code || '';
     const voucherValue = selectedVoucher?.value || 0;
+    const voucherId = selectedVoucher?._id || '';
 
     const totalPrice = subtotalPrice + shippingFee - voucherValue
 
@@ -84,7 +85,7 @@ const Checkout = (props) => {
         setisModalVisible(bool)
     }
 
-    const clickPayment = (paymentname) => {
+    const handleSelectedPayment = (paymentname) => {
         console.log("Selected payment:", paymentname);
         console.log("clickne");
         setpaymentMethod(paymentname)
@@ -94,15 +95,16 @@ const Checkout = (props) => {
         navigation.navigate('Voucher', { subtotalPrice: subtotalPrice })
     }
 
-    const handlesCheckoutPress = async () => {
-        console.log(infoUser._id, email, phonenumber, address, dataNe, selectedPaymentMethod, totalPrice);
+    const handleCreateOrder = async () => {
+        console.log(infoUser._id, email, phonenumber, address, dataNe, paymentMethod, totalPrice, voucherId);
         try {
-            const response = await AxiosInstance().post("/products/order", { userId: infoUser._id, email: email, phonenumber: phonenumber, shippingAddress: address, selectedItems: dataNe, paymentMethod: paymentMethod, totalPrice: totalPrice })
+            const response = await AxiosInstance().post("/products/order", { userId: infoUser._id, email: email, phonenumber: phonenumber, shippingAddress: address, selectedItems: dataNe, paymentMethod: paymentMethod, totalPrice: totalPrice, voucherId: voucherId })
             console.log(response)
             if (response.result == true) {
                 ToastAndroid.show("Thanh toán thành công", ToastAndroid.SHORT)
                 // setdataOrder([...dataOrder, response.order]); // Thêm order mới vào dataOrder
                 setdataOrder(prevOrders => [...prevOrders, response.order]);
+                setselectedVoucher(null)
                 changeModalVisible(true)
             }
         } catch (error) {
@@ -110,13 +112,25 @@ const Checkout = (props) => {
         }
     }
 
-    const handlePayment = () => {
-        if (paymentMethod === "Tiền mặt") {
-            handlesCheckoutPress();
+
+    const handleClickCheckout = async () => {
+        if (!paymentMethod) {
+            ToastAndroid.show("Select a payment method, please", ToastAndroid.SHORT);
+            return;
+        }
+        if (paymentMethod === "Cash") {
+            handleCreateOrder();
         } else if (paymentMethod === "Momo") {
-            handleClickMomo();
+            try {
+                await handleClickMomo(); // Đợi thanh toán Momo hoàn tất
+                handleCreateOrder(); // Tạo đơn hàng chỉ sau khi thanh toán Momo thành công
+            } catch (error) {
+                console.error("Thanh toán Momo thất bại", error);
+                ToastAndroid.show("Thanh toán Momo thất bại", ToastAndroid.SHORT);
+            }
         }
     }
+
 
     return (
         <View style={styles.container}>
@@ -180,9 +194,9 @@ const Checkout = (props) => {
                                 onValueChange={(itemValue, itemIndex) =>
                                     setaddressProvince(itemValue)
                                 }>
-                                <Picker.Item label="Tp. Hồ Chí Minh" value="Tp. Hồ Chí Minh" />
-                                <Picker.Item label="Other" value="Other" />
-                                
+                                <Picker.Item label="Tp. Hồ Chí Minh" value="Tp. Hồ Chí Minh" style={styles.pickerItem} />
+                                <Picker.Item label="Other" value="Other" style={styles.pickerItem} />
+
                             </Picker>
                         </View>
                         <Image style={{
@@ -190,7 +204,7 @@ const Checkout = (props) => {
                             borderRadius: 16, marginTop: 10
                         }}
                             source={require('../media/icon_button/map.png')} />
-                       
+
                     </View>
 
 
@@ -234,7 +248,7 @@ const Checkout = (props) => {
                         payment.map((item, index) => (
                             <TouchableOpacity
                                 key={index}
-                                onPress={() => clickPayment(item)}
+                                onPress={() => handleSelectedPayment(item)}
                                 style={[
                                     styles.borderCategory,
                                     { backgroundColor: paymentMethod === item ? '#5B9EE1' : '#E9EDEF' },
@@ -249,7 +263,7 @@ const Checkout = (props) => {
                     }
                 </View>
                 {/* <Text style={{ textAlign: 'center', marginBottom: 10, marginTop: 10 }}>Phương thức thanh toán khác</Text> */}
-                <Pressable style={styles.btnSubmit} onPress={handlePayment} >
+                <Pressable style={styles.btnSubmit} onPress={handleClickCheckout} >
                     <Text style={styles.btnSubmitLabel}>Payment - {totalPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })} </Text>
                     <Modal transparent={true}
                         animationType='fade'
@@ -257,12 +271,10 @@ const Checkout = (props) => {
                         onRequestClose={() => changeModalVisible(false)}>
                         <CheckoutModal
                             changeModalVisible={changeModalVisible}
+                            navigation={navigation}
                         />
                     </Modal>
                 </Pressable>
-                {/* <Pressable style={styles.btnSubmit} onPress={handlesCheckoutPress} >
-                    <Text style={styles.btnSubmitLabel}>Payment</Text>
-                </Pressable> */}
             </View>
         </View>
     )
@@ -271,6 +283,13 @@ const Checkout = (props) => {
 export default Checkout
 
 const styles = StyleSheet.create({
+    pickerItem: {
+        fontSize: 15,
+        fontFamily: 'Airbnb-Cereal-App-Medium', // Use your desired font family
+        color: '1A2530', // Use your desired font color,
+        borderRadius: 20,
+
+    },
     txtCategory: {
         fontSize: 16,
         lineHeight: 20,

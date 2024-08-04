@@ -9,6 +9,7 @@ const Login = (props) => {
   const [emailUser, setemailUser] = useState("")
   const [passwordUser, setpasswordUser] = useState("")
   const {setisLogin, setinfoUser} = useContext(AppContext)
+
   const signUp = () => {
     navigation.navigate('Register')
   }

@@ -15,10 +15,12 @@ const Cart = (props) => {
   const [billPrice, setbillPrice] = useState(0)
   const [selectedItemsForCheckout, setSelectedItemsForCheckout] = useState([]);
   const shippingFee = 40000
-  const btnBack = () => {
-    navigation.goBack()
-  }
+
   const btnCheckout = () => {
+    if (selectedItemsForCheckout.length === 0) {
+      ToastAndroid.show("Please select a shoe", ToastAndroid.SHORT);
+      return;
+    }
     navigation.navigate('Checkout', { selectedItems: selectedItemsForCheckout, totalPrice: billPrice })
     console.log(selectedItemsForCheckout);
 
@@ -148,7 +150,7 @@ const Cart = (props) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={btnBack}>
+        <TouchableOpacity onPress={() => { navigation.goBack() }}>
           <Image source={require('../media/icon_button/arrow.png')}
             style={{ width: 30, height: 30 }} />
         </TouchableOpacity>

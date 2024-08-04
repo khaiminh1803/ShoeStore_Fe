@@ -51,6 +51,11 @@ const DetailShoe = (props) => {
 
 
   const addToCart = async () => {
+    if (!selectedSize) {
+      ToastAndroid.show("Please select a size", ToastAndroid.SHORT);
+      return;
+    }
+  
     try {
       // http://localhost:3000/api/products/cart/addToCart
       const response = await AxiosInstance().post("/products/cart/addToCart", { userId: infoUser._id, productId: params.id, sizeSelected: selectedSize })
@@ -58,6 +63,7 @@ const DetailShoe = (props) => {
       if (response.result == true) {
         ToastAndroid.show("Thêm sản phẩm thành công", ToastAndroid.SHORT);
         setdataCart(response.cartItem.items)
+        navigation.navigate('Cart')
       } else {
         ToastAndroid.show("Thêm sản phẩm thất bại", ToastAndroid.SHORT);
       }

@@ -51,6 +51,7 @@ import ModelTest from './src/components/ModelTest';
 import ItemOrder from './src/components/item/ItemOrder';
 import DetailOrder from './src/components/DetailOrder';
 import ItemVoucher from './src/components/item/ItemVoucher';
+import Verifycation from './src/components/Verifycation';
 
 
 
@@ -70,6 +71,7 @@ function App(): React.JSX.Element {
         <AppNavigator />
       </NavigationContainer>
     </AppContextProvider>
+  
     // <ItemVoucher/>
     // <DetailOrder/>
     // <ModelTest/>

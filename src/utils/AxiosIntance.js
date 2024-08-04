@@ -5,7 +5,7 @@ const customAxios = (contentType = 'application/json') => {
         // baseURL: 'https://fpoly-hcm.herokuapp.com/api'
         //  baseURL: 'http://172.16.123.4:3000/api/'
         //  baseURL: 'http://192.168.1.27:3000/api/'
-        baseURL: 'http://192.168.1.9:3000/api/'
+        baseURL: 'http://192.168.1.113:3000/api/'
         // baseURL: 'http://192.168.1.13:3000/api/'
         // baseURL: 'http://192.168.1.22:3000/api/'
         // baseURL: 'http://192.168.1.6:3000/api/'

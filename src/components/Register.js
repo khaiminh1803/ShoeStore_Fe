@@ -23,7 +23,7 @@ const Register = (props) => {
       console.log(response)
       if(response.result == true){
           ToastAndroid.show("Đăng ký thành công", ToastAndroid.SHORT)
-          navigation.navigate("Login")
+          navigation.navigate("Verifycation", {email: emailUser})
       }else{
           ToastAndroid.show("Đăng ký thất bại", ToastAndroid.SHORT)
       }

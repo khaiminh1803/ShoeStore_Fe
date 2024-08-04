@@ -23,6 +23,7 @@ import Notification from '../components/Notification';
 import DetailOrder from '../components/DetailOrder';
 import History from '../components/History';
 import Voucher from '../components/Voucher';
+import Verifycation from '../components/Verifycation';
 // welcome, login, register stack
 const Stack = createNativeStackNavigator()
 const User = () => {
@@ -36,6 +37,7 @@ const User = () => {
             <Stack.Screen name="Login" component={Login} />
             <Stack.Screen name="Register" component={Register} />
             <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+            <Stack.Screen name="Verifycation" component={Verifycation} />
         </Stack.Navigator>
     )
 }

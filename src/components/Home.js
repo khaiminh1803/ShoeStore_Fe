@@ -162,7 +162,7 @@ const Home = (props) => {
       <View style={{ paddingHorizontal: 16 }}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 50 }} >
           <View style={{ flexDirection: 'row', marginTop: 20 }}>
-            <Image style={{ width: 62, height: 62, borderRadius: 10 }} source={{ uri: infoUser.avatar }} />
+            <Image style={{ width: 62, height: 62, borderRadius: 10 }} source={{ uri: infoUser?.avatar }} />
             <View style={{ marginStart: 10 }}>
               <Text style={{ color: '#707B81', fontSize: 15, fontFamily: 'Airbnb-Cereal-App-Medium', marginTop: 5 }}>Good moring,</Text>
               <Text style={{ color: '#1A2530', fontSize: 20, fontFamily: 'Airbnb-Cereal-App-Medium', marginTop: 10 }}>{infoUser.name}</Text>
