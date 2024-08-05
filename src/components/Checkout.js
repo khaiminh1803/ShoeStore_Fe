@@ -32,7 +32,7 @@ const Checkout = (props) => {
     // const shippingFee = 40000
     const voucherCode = selectedVoucher?.code || '';
     const voucherValue = selectedVoucher?.value || 0;
-    const voucherId = selectedVoucher?._id || '';
+    const voucherId = selectedVoucher?._id || null;
 
     const totalPrice = subtotalPrice + shippingFee - voucherValue
 
@@ -97,6 +97,10 @@ const Checkout = (props) => {
 
     const handleCreateOrder = async () => {
         console.log(infoUser._id, email, phonenumber, address, dataNe, paymentMethod, totalPrice, voucherId);
+        if(phonenumber === 'Chưa cập nhật' || address === 'Chưa cập nhật') {
+            ToastAndroid.show("Nhập đầy đủ thông tin", ToastAndroid.SHORT)
+            return
+        }
         try {
             const response = await AxiosInstance().post("/products/order", { userId: infoUser._id, email: email, phonenumber: phonenumber, shippingAddress: address, selectedItems: dataNe, paymentMethod: paymentMethod, totalPrice: totalPrice, voucherId: voucherId })
             console.log(response)

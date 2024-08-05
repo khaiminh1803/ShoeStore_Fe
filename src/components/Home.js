@@ -8,14 +8,12 @@ import { Picker } from '@react-native-picker/picker';
 
 const Home = (props) => {
   const { navigation } = props
-  const { infoUser } = useContext(AppContext)
+  const { infoUser, dataFavorite, setdataFavorite } = useContext(AppContext)
   const [dataNe, setdataNe] = useState([])
   const [isLoading, setisLoading] = useState(true)
   const [searchText, setsearchText] = useState("")
   const [selectedCategory, setselectedCategory] = useState(null)
   const [selectedSize, setselectedSize] = useState(null)
-  // const [min, setmin] = useState(null)
-  // const [max, setmax] = useState(null)
   const [min, setmin] = useState("100")
   const [max, setmax] = useState("500")
   const [modalVisible, setModalVisible] = useState(false);
@@ -147,6 +145,17 @@ const Home = (props) => {
     }
   }
 
+  const handleClickFavorite = async (productId) => {
+    // http://localhost:3000/api/products/addFavorite
+    const response = await AxiosInstance().post("/products/addFavorite", { userId: infoUser._id, productId: productId })
+    console.log(response)
+    if (response.result == true) { // lấy dữ liệu thành công
+      setdataFavorite([...dataFavorite, response.favorite])
+      setisLoading(false)
+    } else {
+      ToastAndroid.show("Lấy dữ liệu thất bại", ToastAndroid.SHORT)
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -178,7 +187,6 @@ const Home = (props) => {
             </TouchableOpacity>
           </View>
           <Text style={{ color: '#1A2530', fontSize: 16, lineHeight: 24, fontFamily: 'Airbnb-Cereal-App-Medium', marginTop: 10 }}>Brand</Text>
-
           <View style={[styles.type, { marginTop: 10 }]}>
             {brands.map((brand) => (
               <TouchableOpacity
@@ -194,13 +202,11 @@ const Home = (props) => {
               </TouchableOpacity>
             ))}
           </View>
-
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 }}>
             <Text style={{ color: '#1A2530', fontSize: 16, lineHeight: 24, fontFamily: 'Airbnb-Cereal-App-Medium' }}>Collection</Text>
             <TouchableOpacity onPress={handleClickSeeAll}>
               <Text style={{ color: '#1A2530', fontSize: 16, lineHeight: 24, fontFamily: 'Airbnb-Cereal-App-Medium' }}>See all</Text>
             </TouchableOpacity>
-
           </View>
           {/* <Image style={styles.banner} source={{ uri: 'https://cdn.dribbble.com/users/4063497/screenshots/14707936/media/bb3c9cc3e171c070e73059ee1a9d0155.png?resize=400x0' }} /> */}
           <View>
@@ -211,17 +217,8 @@ const Home = (props) => {
                   <Text>Loading....</Text>
                 </View>
                 :
-                // <FlatList
-                //   data={dataNe}
-                //   renderItem={({ item }) => <ItemShoe dulieu={item} navigation={navigation} />}
-                //   keyExtractor={item => item._id}
-                //   numColumns={2} // Số lượng cột là 2
-                //   showsVerticalScrollIndicator={false}
-                //   columnWrapperStyle={styles.row} // Thêm kiểu cho hàng
-                //   style={{ marginTop: 20, paddingBottom: 100 }}
-                // />
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: 10 }}>
-                  {dataNe.map((item) => <ItemShoe key={item._id} dulieu={item} navigation={navigation} />)}
+                  {dataNe.map((item) => <ItemShoe key={item._id} dulieu={item} navigation={navigation} clickHeart={handleClickFavorite} />)}
                 </View>
             }
           </View>

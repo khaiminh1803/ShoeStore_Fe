@@ -5,9 +5,9 @@ import { formatCurrency } from '../../utils/GlobalFunction'
 
 
 const ItemShoe = (props) => {
-    const {dulieu, navigation} = props
+    const { dulieu, navigation, clickHeart } = props;
     const clickItem = () => {
-        navigation.navigate('DetailShoe', {id: dulieu?._id})
+        navigation.navigate('DetailShoe', { id: dulieu?._id })
     }
     return (
         <TouchableOpacity onPress={clickItem}>
@@ -19,8 +19,10 @@ const ItemShoe = (props) => {
                     <Text numberOfLines={1} style={styles.name}>{dulieu?.name}</Text>
                     <View style={styles.viewRow}>
                         <Text style={styles.name}>{formatCurrency(dulieu?.price)}</Text>
-                        <Image source={require('../../media/icon_button/heartblack.png')}
-                            style={styles.imgHeart} />
+                        <TouchableOpacity onPress={() => clickHeart(dulieu._id)}>
+                            <Image source={require('../../media/icon_button/heartblack.png')} style={styles.imgHeart} />
+                        </TouchableOpacity>
+
                     </View>
                 </View>
             </View>
@@ -46,7 +48,7 @@ const styles = StyleSheet.create({
         lineHeight: 20,
         color: '#1A2530',
         fontWeight: '500',
-       
+
         overflow: 'hidden'
     },
     sex: {

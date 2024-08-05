@@ -10,14 +10,14 @@ const Login = (props) => {
   const [passwordUser, setpasswordUser] = useState("")
   const {setisLogin, setinfoUser} = useContext(AppContext)
 
-  const signUp = () => {
+  const handleClickSignUp = () => {
     navigation.navigate('Register')
   }
-  const forgotPass = () => {
+  const handleClickForgotPass = () => {
     navigation.navigate('ForgotPassword')
   }
 
-  const login = async () => {
+  const handleClickLogin = async () => {
     try {
         // http://localhost:3000/api/users/login
         const response = await AxiosInstance().post("/users/login",{email: emailUser, password : passwordUser})
@@ -54,8 +54,8 @@ const Login = (props) => {
           />
         </View>
       </View>
-      <Text style={[{ textAlign: 'right' }, { marginTop: 10 }, { fontSize: 14 }]} onPress={forgotPass}>Forgot Password</Text>
-      <Pressable style={styles.btnLoginBorder} onPress={login}>
+      <Text style={[{ textAlign: 'right' }, { marginTop: 10 }, { fontSize: 14 }]} onPress={handleClickForgotPass}>Forgot Password</Text>
+      <Pressable style={styles.btnLoginBorder} onPress={handleClickLogin}>
         <Text style={styles.btnLoginLabel}>Sign In</Text>
       </Pressable>
       <Pressable style={styles.btnGoogle}>
@@ -64,7 +64,7 @@ const Login = (props) => {
       </Pressable>
       <View style={styles.footer}>
         <Text style={styles.footer1}>Don't Have An Account?</Text>
-        <Pressable onPress={signUp}>
+        <Pressable onPress={handleClickSignUp}>
           <Text style={styles.footer2}>Sign Up For Free</Text>
         </Pressable>
       </View>

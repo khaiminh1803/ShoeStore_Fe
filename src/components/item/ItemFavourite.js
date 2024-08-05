@@ -7,15 +7,15 @@ const ItemFavourite = (props) => {
   return (
     <TouchableOpacity>
       <View style={styles.container}>
-        <Image source={{ uri: dulieu.image }}
+        <Image source={{ uri: dulieu.productId.image[0] }}
           style={styles.imgShoe} />
 
         <View style={styles.detailShoe}>
-          <Text style={styles.sex}>{dulieu.title}</Text>
-          <Text style={styles.name}>{dulieu.name}</Text>
+          <Text style={styles.sex}>Man</Text>
+          <Text style={styles.name}>{dulieu.productId.name}</Text>
           <View style={styles.viewRow}>
-            <Text style={styles.name}>${dulieu.price}</Text>
-            <Image source={require('../../media/icon_button/heartblack.png')}
+            <Text style={styles.name}>{formatCurrency(dulieu.productId.price)}</Text>
+            <Image source={require('../../media/icon_button/heartred.png')}
               style={styles.imgHeart} />
           </View>
         </View>
