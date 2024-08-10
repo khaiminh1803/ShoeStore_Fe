@@ -90,6 +90,8 @@ const Remaining = () => {
             <Stack.Screen name="Profile" component={Profile} />
             <Stack.Screen name="History" component={History} />
             <Stack.Screen name="DetailOrder" component={DetailOrder} />
+            <Stack.Screen name="Login" component={Login} />
+
         </Stack.Navigator>
     )
 }

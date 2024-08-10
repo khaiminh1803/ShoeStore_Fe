@@ -217,7 +217,7 @@ const Home = (props) => {
                   <Text>Loading....</Text>
                 </View>
                 :
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: 10 }}>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: 10, paddingBottom: 60 }}>
                   {dataNe.map((item) => <ItemShoe key={item._id} dulieu={item} navigation={navigation} clickHeart={handleClickFavorite} />)}
                 </View>
             }

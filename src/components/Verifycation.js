@@ -2,17 +2,20 @@ import { StyleSheet, Text, View, Pressable, Image, TextInput, ToastAndroid } fro
 import React, { useContext, useState } from 'react'
 import { AppContext } from '../utils/AppContext'
 import AxiosInstance from '../utils/AxiosIntance'
+import OTPTextInput from 'react-native-otp-textinput';
 
 
 const Verifycation = (props) => {
     const { navigation, route } = props
     const { params } = route
     const [code, setcode] = useState("")
+
+
     const handleClickVerify = async () => {
         console.log(params.email)
         try {
             // http://localhost:3000/api/users/register
-            const response = await AxiosInstance().post("/users/verify", { email: params.email, code: code})
+            const response = await AxiosInstance().post("/users/verify", { email: params.email, code: code })
             console.log(response)
             if (response.result == true) {
                 ToastAndroid.show("Xác thực thành công", ToastAndroid.SHORT)
@@ -35,10 +38,15 @@ const Verifycation = (props) => {
                 <Text style={styles.welcome}>Please Enter Your Code To</Text>
                 <Text style={styles.welcome}>Verification your account</Text>
             </View>
-            <View style={styles.formLogin}>
+            {/* <View style={styles.formLogin}>
                 <Text style={styles.labelLogin}>Code</Text>
                 <TextInput style={styles.textInput} placeholder='Enter your code' onChangeText={setcode} />
-            </View>
+            </View> */}
+            <OTPTextInput
+                ref={e => (this.otpInput = e)}
+                handleTextChange={text => setcode(text)}
+                inputCount={6}
+            />
             <Pressable style={styles.btnLoginBorder} onPress={handleClickVerify} >
                 <Text style={styles.btnLoginLabel}>Verify</Text>
             </Pressable>

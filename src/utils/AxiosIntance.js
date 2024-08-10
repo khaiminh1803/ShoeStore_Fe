@@ -1,11 +1,13 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+export const ip = '192.168.1.113';
+
 const customAxios = (contentType = 'application/json') => {
     const axiosInstance = axios.create({
         // baseURL: 'https://fpoly-hcm.herokuapp.com/api'
         //  baseURL: 'http://172.16.123.4:3000/api/'
         //  baseURL: 'http://192.168.1.27:3000/api/'
-        baseURL: 'http://192.168.1.113:3000/api/'
+        baseURL: `http://${ip}:3000/api`
         // baseURL: 'http://192.168.1.13:3000/api/'
         // baseURL: 'http://192.168.1.22:3000/api/'
         // baseURL: 'http://192.168.1.6:3000/api/'

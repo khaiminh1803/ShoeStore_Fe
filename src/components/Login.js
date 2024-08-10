@@ -3,6 +3,8 @@ import React, { useContext, useState } from 'react'
 import AxiosInstance from '../utils/AxiosIntance'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppContext } from '../utils/AppContext';
+import ButtonLoginGoogle from './common/ButtonLoginGoogle';
+
 
 const Login = (props) => {
   const { navigation } = props
@@ -58,10 +60,11 @@ const Login = (props) => {
       <Pressable style={styles.btnLoginBorder} onPress={handleClickLogin}>
         <Text style={styles.btnLoginLabel}>Sign In</Text>
       </Pressable>
-      <Pressable style={styles.btnGoogle}>
+      {/* <Pressable style={styles.btnGoogle}>
           <Image source={require('../media/icon_button/google.png')} />
           <Text style={styles.btnGoogleLabel}>Sign in with google</Text>
-      </Pressable>
+      </Pressable> */}
+      <ButtonLoginGoogle />
       <View style={styles.footer}>
         <Text style={styles.footer1}>Don't Have An Account?</Text>
         <Pressable onPress={handleClickSignUp}>

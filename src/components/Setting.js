@@ -1,11 +1,39 @@
-import { StyleSheet, Text, View, TouchableOpacity, Dimensions, Image } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, Dimensions, Image, ToastAndroid } from 'react-native'
 import React, { useContext, useState } from 'react'
 import { AppContext } from '../utils/AppContext'
+import AxiosInstance from '../utils/AxiosIntance'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 
 const Setting = (props) => {
     const { navigation } = props
-    const { infoUser} = useContext(AppContext)
+    const { infoUser, setinfoUser, setisLogin } = useContext(AppContext)
+
+    const handleClickLogout = async () => {
+        try {
+            // Gửi yêu cầu logout tới server
+            const response = await AxiosInstance().post('/users/logout');
+            if (response.error === false) {
+                // Xóa token từ AsyncStorage
+                await AsyncStorage.removeItem("token");
+                // Cập nhật trạng thái của ứng dụng
+                setisLogin(false);
+
+                // Xóa các màn hình cũ và điều hướng đến màn hình Login
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'Login' }],
+                });
+
+            } else {
+                ToastAndroid.show("Đăng xuất thất bại", ToastAndroid.SHORT);
+            }
+        } catch (e) {
+            console.log(e);
+            ToastAndroid.show("Đăng xuất thất bại", ToastAndroid.SHORT);
+        }
+    };
 
     return (
         <View style={styles.container}>
@@ -62,7 +90,7 @@ const Setting = (props) => {
                         />
                         <Text>Payment</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.item} onPress={() => {navigation.navigate('History')}}>
+                    <TouchableOpacity style={styles.item} onPress={() => { navigation.navigate('History') }}>
                         <Image
                             source={require('../media/icon_button/contact.png')}
                             style={styles.btnImg}
@@ -122,7 +150,7 @@ const Setting = (props) => {
                         />
                         <Text>Help</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.item}>
+                    <TouchableOpacity style={styles.item} onPress={handleClickLogout}>
                         <Image
                             source={require('../media/icon_button/logout.png')}
                             style={styles.btnImg}
