@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Pressable, Image, TextInput, ToastAndroid } from 'react-native'
+import { StyleSheet, Text, View, Pressable, Image, TextInput, ToastAndroid, TouchableHighlight, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
 import AxiosInstance from '../utils/AxiosIntance'
 
@@ -11,30 +11,66 @@ const Register = (props) => {
   const [confirmPassword, setconfirmPassword] = useState("")
 
 
-  const signIn = () => {
+  const handleClickLogin = () => {
     navigation.navigate('Login')
   }
 
-  const register = async () => {
+  const validateForm = () => {
+    if (!nameUser.trim()) {
+      ToastAndroid.show("Tên không được để trống", ToastAndroid.SHORT);
+      return false;
+    }
+
+    const emailRegex = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
+    if (!emailRegex.test(emailUser)) {
+      ToastAndroid.show("Email không đúng định dạng", ToastAndroid.SHORT);
+      return false;
+    }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/;
+    if (!passwordRegex.test(passwordUser)) {
+      ToastAndroid.show("Mật khẩu phải có ít nhất 8 ký tự, chữ hoa, chữ thường, số và ký tự đặc biệt", ToastAndroid.SHORT);
+      return false;
+    }
+
+    if (passwordUser !== confirmPassword) {
+      ToastAndroid.show("Mật khẩu không khớp", ToastAndroid.SHORT);
+      return false;
+    }
+
+    return true;
+  }
+
+
+  const handleClickRegister = async () => {
     console.log(emailUser, passwordUser, nameUser, confirmPassword)
+    if (!validateForm()) {
+      return;
+    }
     try {
       // http://localhost:3000/api/users/register
-      const response = await AxiosInstance().post("/users/register",{email: emailUser, password : passwordUser, name: nameUser, confirm_password: confirmPassword})
+      const response = await AxiosInstance().post("/users/register", { email: emailUser, password: passwordUser, name: nameUser, confirm_password: confirmPassword })
       console.log(response)
-      if(response.result == true){
-          ToastAndroid.show("Đăng ký thành công", ToastAndroid.SHORT)
-          navigation.navigate("Verifycation", {email: emailUser})
-      }else{
-          ToastAndroid.show("Đăng ký thất bại", ToastAndroid.SHORT)
+      if (response.result == true) {
+        ToastAndroid.show("Đăng ký thành công", ToastAndroid.SHORT)
+        navigation.navigate("Verifycation", { email: emailUser })
+      } else {
+        ToastAndroid.show("Đăng ký thất bại", ToastAndroid.SHORT)
       }
-  } catch (e) {
-      console.log(e);
-  }
-    
+    } catch (error) {
+      // console.log(e);
+      if (error && error.response.status === 400) {
+        ToastAndroid.show("Đăng ký thất bại", ToastAndroid.SHORT)
+      }
+    }
+
   }
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress={() => {navigation.goBack()}}>
       <Image source={require('../media/icon_button/back.png')} />
+
+      </TouchableOpacity>
       <View style={styles.header}>
         <Text style={styles.hello}>Create Account</Text>
         <Text style={styles.welcome}>Let's Create Account Together</Text>
@@ -62,16 +98,16 @@ const Register = (props) => {
         </View>
       </View>
       <Text style={[{ textAlign: 'right' }, { marginTop: 10 }, { fontSize: 14 }]}>Forgot Password</Text>
-      <Pressable style={styles.btnLoginBorder} onPress={register}>
+      <Pressable style={styles.btnLoginBorder} onPress={handleClickRegister}>
         <Text style={styles.btnLoginLabel}>Sign Up</Text>
       </Pressable>
       <Pressable style={styles.btnGoogle}>
-          <Image source={require('../media/icon_button/google.png')} />
-          <Text style={styles.btnGoogleLabel}>Sign in with google</Text>
+        <Image source={require('../media/icon_button/google.png')} />
+        <Text style={styles.btnGoogleLabel}>Sign in with google</Text>
       </Pressable>
       <View style={styles.footer}>
         <Text style={styles.footer1}>Already Have An Account?</Text>
-        <Pressable onPress={signIn}>
+        <Pressable onPress={handleClickLogin}>
           <Text style={styles.footer2}>Sign in</Text>
         </Pressable>
       </View>

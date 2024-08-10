@@ -5,12 +5,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppContext } from '../utils/AppContext';
 import ButtonLoginGoogle from './common/ButtonLoginGoogle';
 
-
 const Login = (props) => {
   const { navigation } = props
   const [emailUser, setemailUser] = useState("")
   const [passwordUser, setpasswordUser] = useState("")
-  const {setisLogin, setinfoUser} = useContext(AppContext)
+  const { setisLogin, setinfoUser } = useContext(AppContext)
 
   const handleClickSignUp = () => {
     navigation.navigate('Register')
@@ -18,25 +17,54 @@ const Login = (props) => {
   const handleClickForgotPass = () => {
     navigation.navigate('ForgotPassword')
   }
-
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+  const validatePassword = (password) => {
+    return password.length >= 6;
+  }
   const handleClickLogin = async () => {
-    try {
-        // http://localhost:3000/api/users/login
-        const response = await AxiosInstance().post("/users/login",{email: emailUser, password : passwordUser})
-        if(response.error == false){
-            console.log(response.data.token )
-            console.log(response.data.user);
-            await AsyncStorage.setItem("token",response.data.token)
-            ToastAndroid.show("Đăng nhập thành công", ToastAndroid.SHORT);
-            setinfoUser(response.data.user)
-            setisLogin(true)
-        }else{
-            ToastAndroid.show("Đăng nhập thất bại", ToastAndroid.SHORT);
-        }
-    } catch (e) {
-        console.log(e)
+    if (!emailUser.trim()) {
+      ToastAndroid.show("Email không được để trống", ToastAndroid.SHORT);
+      return;
     }
-}
+    if (!validateEmail(emailUser)) {
+      ToastAndroid.show("Email không hợp lệ", ToastAndroid.SHORT);
+      return;
+    }
+    if (!passwordUser.trim()) {
+      ToastAndroid.show("Mật khẩu không được để trống", ToastAndroid.SHORT);
+      return;
+    }
+    if (!validatePassword(passwordUser)) {
+      ToastAndroid.show("Mật khẩu phải có ít nhất 6 ký tự", ToastAndroid.SHORT);
+      return;
+    }
+    try {
+      // http://localhost:3000/api/users/login
+      const response = await AxiosInstance().post("/users/login", { email: emailUser, password: passwordUser })
+      if (response.error == false) {
+        console.log(response.data.token)
+        console.log(response.data.user);
+        await AsyncStorage.setItem("token", response.data.token)
+        ToastAndroid.show("Đăng nhập thành công", ToastAndroid.SHORT);
+        setinfoUser(response.data.user)
+        setisLogin(true)
+      } else {
+        ToastAndroid.show("Đăng nhập thất bại", ToastAndroid.SHORT);
+      }
+    } catch (error) {
+      // console.log(e)
+      // Xử lý các lỗi xảy ra, như mã trạng thái 400, 500,...
+      if (error.response && error.response.status === 400) {
+        ToastAndroid.show("Sai email hoặc mật khẩu.", ToastAndroid.SHORT);
+      } else {
+        ToastAndroid.show("Có lỗi xảy ra, vui lòng thử lại sau.", ToastAndroid.SHORT);
+      }
+      console.log('Error during login:', error);
+    }
+  }
   return (
     <View style={styles.container}>
       <Image source={require('../media/icon_button/back.png')} />
@@ -46,10 +74,10 @@ const Login = (props) => {
       </View>
       <View style={styles.formLogin}>
         <Text style={styles.labelLogin}>Email Address</Text>
-        <TextInput style={styles.textInput} onChangeText={setemailUser}/>
+        <TextInput style={styles.textInput} onChangeText={setemailUser} />
         <Text style={[styles.labelLogin, { marginTop: 20 }]}>Password</Text>
         <View style={styles.passwordInput}>
-          <TextInput style={styles.textInput} secureTextEntry onChangeText={setpasswordUser}/>
+          <TextInput style={styles.textInput} secureTextEntry onChangeText={setpasswordUser} />
           <Image
             source={require('../media/icon_button/eye.png')}
             style={styles.eyeIcon}
