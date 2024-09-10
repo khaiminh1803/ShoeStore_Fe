@@ -38,14 +38,12 @@ const Verifycation = (props) => {
                 <Text style={styles.welcome}>Please Enter Your Code To</Text>
                 <Text style={styles.welcome}>Verification your account</Text>
             </View>
-            {/* <View style={styles.formLogin}>
-                <Text style={styles.labelLogin}>Code</Text>
-                <TextInput style={styles.textInput} placeholder='Enter your code' onChangeText={setcode} />
-            </View> */}
             <OTPTextInput
                 ref={e => (this.otpInput = e)}
                 handleTextChange={text => setcode(text)}
                 inputCount={6}
+                tintColor="#5b9ee1" // Active input border color
+                offTintColor="#bdc3c7" // Inactive input border color
             />
             <Pressable style={styles.btnLoginBorder} onPress={handleClickVerify} >
                 <Text style={styles.btnLoginLabel}>Verify</Text>

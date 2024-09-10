@@ -1,15 +1,31 @@
 import { StyleSheet, Text, View, Pressable, Image, TextInput, ToastAndroid } from 'react-native'
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { AppContext } from '../utils/AppContext'
+import AxiosInstance from '../utils/AxiosIntance'
+
 
 const ForgotPassword = (props) => {
   const { navigation } = props
-  const back = () => {
-    navigation.navigate('Login')
+  const [email, setemail] = useState("")
+  
+  const handleForgotPassword = async () => {
+    try {
+      // http://localhost:3000/api/users/forgotPassword
+      const response = await AxiosInstance().post("/users/forgotPassword", { email })
+      console.log(response);
+      
+      if (response.result == true) {
+        ToastAndroid.show("Code will be sent, check your email", ToastAndroid.SHORT);
+        navigation.navigate('ResetPassword', {email: email})
+      } 
+    } catch (error) {
+      console.log('Error during login:', error);
+    }
   }
+
   return (
     <View style={styles.container}>
-      <Pressable onPress={back}>
+      <Pressable onPress={() => {navigation.goBack()}}>
         <Image source={require('../media/icon_button/back.png')} />
       </Pressable>
       
@@ -20,9 +36,9 @@ const ForgotPassword = (props) => {
       </View>
       <View style={styles.formLogin}>
         <Text style={styles.labelLogin}>Email Address</Text>
-        <TextInput style={styles.textInput} placeholder='Enter your email' />
+        <TextInput style={styles.textInput} placeholder='Enter your email' onChangeText={setemail} />
       </View>
-      <Pressable style={styles.btnLoginBorder} >
+      <Pressable style={styles.btnLoginBorder} onPress={handleForgotPassword}>
         <Text style={styles.btnLoginLabel}>Continue</Text>
       </Pressable>
 

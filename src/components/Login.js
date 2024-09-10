@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Pressable, Image, TextInput, ToastAndroid } from 'react-native'
+import { StyleSheet, Text, View, Pressable, Image, TextInput, ToastAndroid, TouchableOpacity } from 'react-native'
 import React, { useContext, useState } from 'react'
 import AxiosInstance from '../utils/AxiosIntance'
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -10,13 +10,16 @@ const Login = (props) => {
   const [emailUser, setemailUser] = useState("")
   const [passwordUser, setpasswordUser] = useState("")
   const { setisLogin, setinfoUser } = useContext(AppContext)
+  const [passStatus, setpassStatus] = useState(true)
 
-  const handleClickSignUp = () => {
-    navigation.navigate('Register')
+  const handleClickEye = () => {
+    if (passStatus) {
+      setpassStatus(false)
+    } else {
+      setpassStatus(true)
+    }
   }
-  const handleClickForgotPass = () => {
-    navigation.navigate('ForgotPassword')
-  }
+
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -55,12 +58,14 @@ const Login = (props) => {
         ToastAndroid.show("Đăng nhập thất bại", ToastAndroid.SHORT);
       }
     } catch (error) {
-      // console.log(e)
-      // Xử lý các lỗi xảy ra, như mã trạng thái 400, 500,...
-      if (error.response && error.response.status === 400) {
+      if (error.response && error.response.status === 410) {
+        ToastAndroid.show("Tài khoản chưa xác thực.", ToastAndroid.SHORT);
+      } else if (error.response && error.response.status === 400) {
         ToastAndroid.show("Sai email hoặc mật khẩu.", ToastAndroid.SHORT);
+
       } else {
         ToastAndroid.show("Có lỗi xảy ra, vui lòng thử lại sau.", ToastAndroid.SHORT);
+
       }
       console.log('Error during login:', error);
     }
@@ -77,25 +82,27 @@ const Login = (props) => {
         <TextInput style={styles.textInput} onChangeText={setemailUser} />
         <Text style={[styles.labelLogin, { marginTop: 20 }]}>Password</Text>
         <View style={styles.passwordInput}>
-          <TextInput style={styles.textInput} secureTextEntry onChangeText={setpasswordUser} />
-          <Image
-            source={require('../media/icon_button/eye.png')}
-            style={styles.eyeIcon}
-          />
+          <TextInput style={styles.textInput} secureTextEntry={passStatus} onChangeText={setpasswordUser} />
+          <TouchableOpacity onPress={handleClickEye} style={styles.eyeIcon}>
+            <Image
+              source={require('../media/icon_button/eye.png')}
+            />
+          </TouchableOpacity>
+
         </View>
       </View>
-      <Text style={[{ textAlign: 'right' }, { marginTop: 10 }, { fontSize: 14 }]} onPress={handleClickForgotPass}>Forgot Password</Text>
+      <TouchableOpacity style={{ marginTop: 10}} onPress={() => { navigation.navigate('ForgotPassword') }}>
+        <Text style={{ textAlign: 'right', fontFamily: 'Airbnb-Cereal-App-Bold', fontSize: 14 }}>
+          Forgot Password</Text>
+      </TouchableOpacity>
+
       <Pressable style={styles.btnLoginBorder} onPress={handleClickLogin}>
         <Text style={styles.btnLoginLabel}>Sign In</Text>
       </Pressable>
-      {/* <Pressable style={styles.btnGoogle}>
-          <Image source={require('../media/icon_button/google.png')} />
-          <Text style={styles.btnGoogleLabel}>Sign in with google</Text>
-      </Pressable> */}
       <ButtonLoginGoogle />
       <View style={styles.footer}>
         <Text style={styles.footer1}>Don't Have An Account?</Text>
-        <Pressable onPress={handleClickSignUp}>
+        <Pressable onPress={() => { navigation.navigate('Register') }}>
           <Text style={styles.footer2}>Sign Up For Free</Text>
         </Pressable>
       </View>
@@ -170,7 +177,8 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 48,
     padding: 10,
-    paddingLeft: 20
+    paddingLeft: 20,
+    // elevation: 0.5
   },
   labelLogin: {
     fontSize: 16,

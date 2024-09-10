@@ -1,9 +1,9 @@
-import { Image, Pressable, StyleSheet, Text, View, FlatList, ActivityIndicator } from 'react-native'
+import { Image, StyleSheet, Text, View, ActivityIndicator, ToastAndroid, ScrollView } from 'react-native'
 import React, { useEffect, useState, useContext } from 'react'
 import ItemFavourite from './item/ItemFavourite'
 import AxiosInstance from '../utils/AxiosIntance'
 import { AppContext } from '../utils/AppContext'
-import ItemOrder from './item/ItemOrder'
+
 
 
 
@@ -28,35 +28,42 @@ const Favorite = (props) => {
     getFavorites()
 
   }, [])
+
+  const handleDeleteFavorite = async (productId) => {
+    try {
+      const response = await AxiosInstance().delete("/products/removeFavorite", {
+        data: { userId: infoUser._id, productId: productId } // Chú ý: phải sử dụng 'data' khi gửi request DELETE có body
+      });
+      if (response.result === true) {
+        const updatedFavorites = dataFavorite.filter(item => item.productId !== productId);
+        setdataFavorite(updatedFavorites);
+        ToastAndroid.show("Delete Succesfully", ToastAndroid.SHORT);
+      } else {
+        ToastAndroid.show("Delete fail", ToastAndroid.SHORT);
+      }
+    } catch (error) {
+      console.error("Error removing favorite:", error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.text}>Favourite</Text>
-
       </View>
-
-      {
-        isLoading == true ?
-          <View style={styles.loading}>
-            <ActivityIndicator size='large' color='#fff00' />
-            <Text>Loading....</Text>
-          </View>
-          :
-          // <FlatList
-          //   data={dataFavorite}
-          //   renderItem={({ item }) => <ItemFavourite dulieu={item} navigation={navigation}
-          //   />}
-          //   numColumns={2}
-          //   keyExtractor={item => item._id}
-          //   showsVerticalScrollIndicator={false}
-          //   style={{ marginTop: 3, height: 450 }}
-          // />
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: 10, paddingHorizontal: 10 }}>
-            {dataFavorite.map((item) => <ItemFavourite key={item._id} dulieu={item} navigation={navigation} />)}
-          </View>
-      }
-
-
+      <ScrollView>
+        {
+          isLoading == true ?
+            <View style={styles.loading}>
+              <ActivityIndicator size='large' color='#fff00' />
+              <Text>Loading....</Text>
+            </View>
+            :
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: 10, paddingHorizontal: 15, paddingBottom: 60 }}>
+              {dataFavorite.map((item) => <ItemFavourite key={item._id} dulieu={item} navigation={navigation} onDelete={() => handleDeleteFavorite(item.productId)} />)}
+            </View>
+        }
+      </ScrollView>
     </View>
   )
 }
@@ -72,14 +79,12 @@ const styles = StyleSheet.create({
   row: {
     flex: 1,
     justifyContent: 'space-between',
-    marginBottom: 10, // Khoảng cách giữa các hàng
+    marginBottom: 10,
   },
   text: {
     fontSize: 20,
-    // lineHeight: 20,
     fontFamily: 'Airbnb-Cereal-App-Bold',
     color: 'white',
-
   },
   viewRow: {
     flexDirection: 'row',

@@ -9,8 +9,7 @@ const Voucher = (props) => {
     const { navigation , route} = props
     const subtotalPrice = route?.params.subtotalPrice
     const [isLoading, setisLoading] = useState(true)
-    // const [selectedVoucher, setSelectedVoucher] = useState(null);
-    const [tempSelectedVoucher, setTempSelectedVoucher] = useState(null); // Tạo state tạm thời cho voucher được chọn
+    const [tempSelectedVoucher, setTempSelectedVoucher] = useState(null); 
     const { dataVoucher, setdataVoucher,selectedVoucher,setselectedVoucher } = useContext(AppContext)
     const getAllVouchers = async () => {
         // http://localhost:3000/api/products/getAllVoucher
@@ -25,13 +24,15 @@ const Voucher = (props) => {
     }
     useEffect(() => {
         getAllVouchers()
-        return () => {
-        }
     }, [])
 
     const handleClickSelect = () => {
         console.log('Subtotal Price:', subtotalPrice);
         console.log('Selected Voucher Minimum Purchase Amount:', tempSelectedVoucher?.minPurchaseAmount);
+        if (!tempSelectedVoucher) {
+            ToastAndroid.show("Không có voucher được chọn", ToastAndroid.SHORT);
+            return;
+        }
         if (tempSelectedVoucher && subtotalPrice >= tempSelectedVoucher.minPurchaseAmount) {
             setselectedVoucher(tempSelectedVoucher);
             navigation.goBack();
@@ -41,7 +42,7 @@ const Voucher = (props) => {
     };
 
     const handleSelectVoucher = (voucher) => {
-        setTempSelectedVoucher(voucher); // Update the selected voucher
+        setTempSelectedVoucher(voucher); 
         console.log(tempSelectedVoucher);
     };
 

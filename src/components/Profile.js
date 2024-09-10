@@ -6,7 +6,8 @@ import AxiosInstance from '../utils/AxiosIntance'
 
 
 
-const Profile = () => {
+const Profile = (props) => {
+  const { navigation } = props
   const { infoUser, setinfoUser } = useContext(AppContext)
   const [visible, setVisible] = useState(false);
 
@@ -30,9 +31,9 @@ const Profile = () => {
     console.log(response)
     if (response.result == true) {
       setinfoUser({ ...infoUser, avatar: response.url })
-      ToastAndroid.show("Đăng ảnh thành công", ToastAndroid.SHORT)
+      ToastAndroid.show("Update image succesfully", ToastAndroid.SHORT)
     } else {
-      ToastAndroid.show("Đăng ảnh thất bại", ToastAndroid.SHORT)
+      ToastAndroid.show("Update image fail", ToastAndroid.SHORT)
     }
   }
 
@@ -49,14 +50,13 @@ const Profile = () => {
     console.log(response)
     if (response.result == true) {
       setinfoUser({ ...infoUser, avatar: response.url })
-      ToastAndroid.show("Đăng ảnh thành công", ToastAndroid.SHORT)
+      ToastAndroid.show("Update image succesfully", ToastAndroid.SHORT)
     } else {
-      ToastAndroid.show("Đăng ảnh thất bại", ToastAndroid.SHORT)
+      ToastAndroid.show("Update image fail", ToastAndroid.SHORT)
     }
   }
 
-  const updateProfile = async () => {
-    console.log("clickNEEEE");
+  const handleUpdateProfile = async () => {
     try {
       const response = await AxiosInstance().post('/users/update-profile', {
         id: infoUser._id,
@@ -69,6 +69,7 @@ const Profile = () => {
       console.log(response);
       if (response.result == true) {
         ToastAndroid.show("Update succesfully", ToastAndroid.SHORT)
+        navigation.navigate('Setting')
       } else {
         ToastAndroid.show("Update failed", ToastAndroid.SHORT)
       }
@@ -81,11 +82,18 @@ const Profile = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View style={{ width: 24, height: 24 }}></View>
-        <Text style={styles.title}>Profile</Text>
-        <TouchableOpacity onPress={updateProfile}>
-          <Image source={require('../media/icon_button/edit.png')} style={{ width: 24, height: 24 }} />
-
+        <TouchableOpacity onPress={() => { navigation.goBack() }}>
+          <Image source={require('../media/icon_button/arrow.png')}
+            style={{ width: 30, height: 30 }} />
+        </TouchableOpacity>
+        <Text style={{
+          textAlign: 'center', fontFamily: 'Airbnb Cereal App'
+          , fontSize: 20,
+          color: 'white', fontWeight: 'bold'
+        }}>Profile</Text>
+        <TouchableOpacity onPress={() => { navigation.goBack() }}>
+          <Image source={require('../media/icon_button/edit.png')}
+            style={{ width: 30, height: 30 }} />
         </TouchableOpacity>
       </View>
       <View style={styles.borderAvatar}>
@@ -95,15 +103,18 @@ const Profile = () => {
         </TouchableOpacity>
 
       </View>
-      <Text style={styles.namUser}>{infoUser.name}</Text>
-      <Text style={styles.label}>Full Name</Text>
-      <TextInput style={styles.textInput} value={infoUser.name} onChangeText={(text) => setinfoUser({ ...infoUser, name: text })} />
-      <Text style={styles.label}>Email Address</Text>
-      <TextInput style={styles.textInput} value={infoUser.email} onChangeText={(text) => setinfoUser({ ...infoUser, email: text })} />
-      <Text style={styles.label}>Address</Text>
-      <TextInput style={styles.textInput} value={infoUser.address} onChangeText={(text) => setinfoUser({ ...infoUser, address: text })} />
-      <Text style={styles.label}>Phone Number</Text>
-      <TextInput style={styles.textInput} value={infoUser.phonenumber} onChangeText={(text) => setinfoUser({ ...infoUser, phonenumber: text })} />
+      <View style={{ paddingHorizontal: 20 }}>
+        <Text style={styles.namUser}>{infoUser.name}</Text>
+        <Text style={styles.label}>Full Name</Text>
+        <TextInput style={styles.textInput} value={infoUser.name} onChangeText={(text) => setinfoUser({ ...infoUser, name: text })} />
+        <Text style={styles.label}>Email Address</Text>
+        <TextInput style={styles.textInput} value={infoUser.email} onChangeText={(text) => setinfoUser({ ...infoUser, email: text })} />
+        <Text style={styles.label}>Address</Text>
+        <TextInput style={styles.textInput} value={infoUser.address} onChangeText={(text) => setinfoUser({ ...infoUser, address: text })} />
+        <Text style={styles.label}>Phone Number</Text>
+        <TextInput style={styles.textInput} value={infoUser.phonenumber} onChangeText={(text) => setinfoUser({ ...infoUser, phonenumber: text })} />
+      </View>
+
       <Modal
         visible={visible}
         onRequestClose={handleCloseModal}
@@ -111,14 +122,24 @@ const Profile = () => {
         animationType='fade'
         style={styles.modal}>
         <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Chọn ảnh hoặc chụp ảnh</Text>
-
-          <Button title="Chụp ảnh" onPress={capture} style={styles.modalButton} />
+          <Text style={styles.modalTitle}>Change Avatar</Text>
+          <TouchableOpacity style={styles.modalButton} onPress={capture}>
+            <Text style={styles.modalButtonText}>Capture</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.modalButton} onPress={getImageLibrary}>
+            <Text style={styles.modalButtonText}>Library</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.modalButton} onPress={handleCloseModal}>
+            <Text style={styles.modalButtonText}>Cancel</Text>
+          </TouchableOpacity>
+          {/* <Button title="aaaaâ" onPress={capture} style={styles.modalButton} />
           <Button title="Chọn ảnh từ thiết bị" onPress={getImageLibrary} style={styles.modalButton} />
-
-          <Button title="Hủy" onPress={handleCloseModal} style={styles.modalButton} />
+          <Button title="Hủy" onPress={handleCloseModal} style={styles.modalButton} /> */}
         </View>
       </Modal>
+      <TouchableOpacity style={styles.btnLoginBorder} onPress={handleUpdateProfile}>
+        <Text style={styles.btnLoginLabel}>Update</Text>
+      </TouchableOpacity>
     </View>
 
   )
@@ -127,19 +148,44 @@ const Profile = () => {
 export default Profile
 
 const styles = StyleSheet.create({
+  btnLoginLabel: {
+    fontSize: 18,
+    lineHeight: 24,
+    letterSpacing: 0.12,
+    color: '#fff',
+    fontFamily: 'Airbnb-Cereal-App-Bold'
+  },
+  btnLoginBorder: {
+    marginTop: 70,
+    marginHorizontal: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 25,
+    backgroundColor: '#5b9ee1',
+    height: 60,
+    paddingVertical: 13,
+    paddingHorizontal: 24,
+  },
   modal: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)'
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    flex: 1,
+  },
+  modalButtonText: {
+    color: 'white', fontSize: 16, fontFamily: 'Airbnb-Cereal-App-Medium'
   },
   modalButton: {
     margin: 5,
     padding: 10,
-    backgroundColor: 'black'
+    backgroundColor: '#5b9ee1',
+    alignItems: 'center',
+    borderRadius: 5
   },
   modalContent: {
     backgroundColor: '#fff',
     padding: 20,
     margin: 20,
     borderRadius: 10,
+    elevation: 3
   },
   modalTitle: {
     fontSize: 20,
@@ -195,15 +241,17 @@ const styles = StyleSheet.create({
     color: '#1A2530',
     textAlign: 'center'
   },
+ 
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    height: 50,
+    paddingHorizontal: 10,
+    backgroundColor: '#5b9ee1'
   },
   container: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
     backgroundColor: '#f8f9fa'
   },
 })

@@ -8,21 +8,32 @@ const ItemOrder = (props) => {
         navigation.navigate('DetailOrder', { id: dulieu?._id })
         console.log(dulieu._id);
     }
+
+    const capitalizeFirstLetter = (string) => {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+      };
     const countProduct = dulieu.items.reduce((total, item) => total + item.quantity, 0);
 
     return (
         <TouchableOpacity onPress={clickItem}>
             <View style={styles.container}>
-                <Image style={styles.imgShoe} source={{ uri: dulieu?.items[0].product.image[0] }} />
-                <View style={{ marginStart: 15, marginTop: 5 }}>
-                    <Text style={styles.nameShoe}>{dulieu.items[0].product.name}</Text>
-                    <Text style={[styles.sizeShoe, { marginTop: 5 }]}>Size: {dulieu.items[0].sizeSelected}</Text>
-                    <Text style={[styles.priceShoe, { marginTop: 10 }]}>{formatCurrency(dulieu.items[0].product.price)}</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
+                    <Text style={styles.nameShoe}>{capitalizeFirstLetter(dulieu.status)}</Text>
+                    <Text style={{fontFamily: 'Airbnb-Cereal-App-Medium',}} >{dulieu._id}</Text>
+
                 </View>
-                <Text style={styles.quantity}>x{dulieu.items[0].quantity}</Text>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', position: 'absolute', bottom: -40, left: 0, right: 0, borderBottomWidth: 0.8, paddingVertical: 10 }}>
+                <View style={{ flexDirection: 'row' }}>
+                    <Image style={styles.imgShoe} source={{ uri: dulieu?.items[0].product.image[0] }} />
+                    <View style={{ marginStart: 15, marginTop: 5 }}>
+                        <Text style={styles.nameShoe}>{dulieu.items[0].product.name}</Text>
+                        <Text style={[styles.sizeShoe, { marginTop: 5 }]}>Size: {dulieu.items[0].sizeSelected}</Text>
+                        <Text style={[styles.priceShoe, { marginTop: 10 }]}>{formatCurrency(dulieu.items[0].product.price)}</Text>
+                    </View>
+                    <Text style={styles.quantity}>x{dulieu.items[0].quantity}</Text>
+                </View>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                     <Text style={styles.nameShoe}>{countProduct} sản phẩm</Text>
-                    <Text style={styles.nameShoe}>Thành tiền: {formatCurrency(dulieu.totalPrice)}</Text>
+                    <Text style={styles.totalShoe}>Thành tiền: {formatCurrency(dulieu.totalPrice)}</Text>
                 </View>
             </View>
         </TouchableOpacity>
@@ -66,8 +77,15 @@ const styles = StyleSheet.create({
         lineHeight: 20,
         fontWeight: '500',
         fontFamily: 'Airbnb-Cereal-App-Medium',
-        color: '#1A2530',
+        color: '#5b9ee1',
         marginTop: 5
+    },
+    totalShoe: {
+        fontSize: 16,
+        lineHeight: 20,
+        fontWeight: '500',
+        fontFamily: 'Airbnb-Cereal-App-Medium',
+        color: '#5b9ee1',
     },
     nameShoe: {
         fontSize: 16,
@@ -83,11 +101,10 @@ const styles = StyleSheet.create({
     },
     container: {
         margin: 10,
-        marginBottom: 60,
-        // paddingHorizontal: 10,
-        flexDirection: 'row',
+        padding: 20,
         position: 'relative',
-        // backgroundColor: 'red',
+        borderRadius: 10,
+        backgroundColor: 'white',
 
     }
 })

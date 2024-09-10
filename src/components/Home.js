@@ -1,27 +1,38 @@
-import { StyleSheet, Text, View, Image, TextInput, FlatList, ScrollView, Pressable, ActivityIndicator, TouchableOpacity, Modal } from 'react-native'
+import { StyleSheet, Text, View, Image, TextInput, ScrollView, Pressable, ActivityIndicator, TouchableOpacity, Modal, Dimensions, ToastAndroid } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
-
 import { AppContext } from '../utils/AppContext'
 import AxiosInstance from '../utils/AxiosIntance'
 import ItemShoe from './item/ItemShoe'
 import { Picker } from '@react-native-picker/picker';
+import ImageSwiper from './common/ImageSwiper'
+
+import Swiper from 'react-native-swiper';
+
+const { width } = Dimensions.get('window');
+
+const images = [
+  'https://thesneakerhouse.com/wp-content/uploads/2023/04/ADIDAS-ULTRABOOST-LIGHT-SHOES-1-768x768.jpg',
+  'https://thesneakerhouse.com/wp-content/uploads/2023/04/ADIDAS-ULTRABOOST-LIGHT-SHOES-6-768x768.jpg',
+  'https://thesneakerhouse.com/wp-content/uploads/2023/04/ADIDAS-ULTRABOOST-LIGHT-SHOES-4-768x768.jpg',
+  'https://thesneakerhouse.com/wp-content/uploads/2023/04/ADIDAS-ULTRABOOST-LIGHT-SHOES-5-768x768.jpg',
+  'https://thesneakerhouse.com/wp-content/uploads/2023/04/ADIDAS-ULTRABOOST-LIGHT-SHOES-2-768x768.jpg',
+  'https://thesneakerhouse.com/wp-content/uploads/2023/04/ADIDAS-ULTRABOOST-LIGHT-SHOES-3-768x768.jpg',
+
+];
+
+
 
 const Home = (props) => {
   const { navigation } = props
   const { infoUser, dataFavorite, setdataFavorite } = useContext(AppContext)
   const [dataNe, setdataNe] = useState([])
   const [isLoading, setisLoading] = useState(true)
-  const [searchText, setsearchText] = useState("")
   const [selectedCategory, setselectedCategory] = useState(null)
   const [selectedSize, setselectedSize] = useState(null)
-  const [min, setmin] = useState("100")
-  const [max, setmax] = useState("500")
+  const [min, setmin] = useState("100000")
+  const [max, setmax] = useState("600000")
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedBrand, setSelectedBrand] = useState(null);
-
-  const handlePress = (brand) => {
-    setSelectedBrand(brand);
-  };
 
   const category = ["Men", "Women", 'Kid']
   const sizes = ["36", "37", "38", "39", "40", "41", "42"]
@@ -36,15 +47,13 @@ const Home = (props) => {
   const handleClickSeeAll = async () => {
     console.log("Click see all");
     setSelectedBrand(null)
-    getAllProducts().catch(error => {
-      console.error("Error handling getAllProducts:", error);
-      // Xử lý lỗi ở đây, ví dụ hiển thị thông báo cho người dùng
-    });
+    getAllProducts()
   }
 
-  const handleClickCart = () => {
-    navigation.navigate('Cart')
-  }
+  const handlePress = (brand) => {
+    setSelectedBrand(brand);
+  };
+
   const clickCategory = (categoryName) => {
     console.log("Selected category:", categoryName);
     console.log("clickne");
@@ -61,10 +70,6 @@ const Home = (props) => {
     setmax(null)
   }
   const handleClickApply = async () => {
-    console.log(selectedCategory);
-    console.log(selectedSize);
-    console.log(min);
-    console.log(max);
     try {
       // http://localhost:3000/api/products/filter
       const response = await AxiosInstance().get("/products/filter", {
@@ -78,29 +83,31 @@ const Home = (props) => {
       if (response.result == true) {
         setdataNe(response.products)
         setModalVisible(false)
-        // setisLoading(false)
       } else {
-        ToastAndroid.show("Không có sản phẩm phù hợp", ToastAndroid.SHORT);
-        console.log("loi vcl");
+        ToastAndroid.show("Not products found", ToastAndroid.LONG);
       }
-    } catch (e) {
-      console.log(e)
+    } catch (error) {
+      if (error.response && error.response.status === 400) {
+        ToastAndroid.show(error.response.data.message, ToastAndroid.SHORT);
+      }
     }
   }
 
   const getProductByBrand = async () => {
-    // http://localhost:3000/api/products/filterByBrand
-    const response = await AxiosInstance().get("/products/filterByBrand", { params: { brandName: selectedBrand } })
-    console.log(response)
-    if (response.result == true) { // lấy dữ liệu thành công
-      setdataNe(response.products)
-      setisLoading(false)
-    } else {
-      ToastAndroid.show("Lấy dữ liệu thất bại", ToastAndroid.SHORT)
+    try {
+      // http://localhost:3000/api/products/filterByBrand
+      const response = await AxiosInstance().get("/products/filterByBrand", { params: { brandName: selectedBrand } })
+      console.log(response)
+      if (response.result == true) { // lấy dữ liệu thành công
+        setdataNe(response.products)
+        setisLoading(false)
+      } else {
+        ToastAndroid.show("Lấy dữ liệu thất bại", ToastAndroid.SHORT)
+      }
+    } catch (error) {
+      console.log(error)
     }
   }
-
-
   useEffect(() => {
     // getProductByBrand()
     if (selectedBrand) {
@@ -119,11 +126,11 @@ const Home = (props) => {
       ToastAndroid.show("Lấy dữ liệu thất bại", ToastAndroid.SHORT)
     }
   }
+
   useEffect(() => {
     getAllProducts()
-    return () => {
-    }
   }, [])
+
   let timeOut = null
   const countDownSearch = (searchText) => {
     if (timeOut) {
@@ -141,21 +148,31 @@ const Home = (props) => {
       setdataNe(response.products)
       setisLoading(false)
     } else {
-      ToastAndroid.show("Lấy dữ liệu thất bại", ToastAndroid.SHORT)
+      ToastAndroid.show("Get data fail", ToastAndroid.SHORT)
     }
   }
 
   const handleClickFavorite = async (productId) => {
-    // http://localhost:3000/api/products/addFavorite
-    const response = await AxiosInstance().post("/products/addFavorite", { userId: infoUser._id, productId: productId })
-    console.log(response)
-    if (response.result == true) { // lấy dữ liệu thành công
-      setdataFavorite([...dataFavorite, response.favorite])
-      setisLoading(false)
-    } else {
-      ToastAndroid.show("Lấy dữ liệu thất bại", ToastAndroid.SHORT)
+    try {
+      const isFavorite = dataFavorite.some(item => item.productId._id === productId);
+      if (isFavorite) {
+        ToastAndroid.show("Product has been added", ToastAndroid.SHORT);
+        return;
+      }
+      const response = await AxiosInstance().post("/products/addFavorite", { userId: infoUser._id, productId: productId });
+      if (response.result == true) {
+        setdataFavorite([...dataFavorite, response.favorite]);
+        setisLoading(false);
+        ToastAndroid.show("Add successfully", ToastAndroid.SHORT);
+      } else {
+        ToastAndroid.show("Add failed", ToastAndroid.SHORT);
+      }
+    } catch (error) {
+      console.error("Error adding favorite: ", error);
     }
   }
+
+
 
   return (
     <View style={styles.container}>
@@ -164,10 +181,11 @@ const Home = (props) => {
           <Image source={require('../media/icon_button/menu.png')} style={{ width: 30, height: 30 }} />
         </Pressable>
         <Text style={{ fontSize: 20, fontWeight: '500', fontFamily: 'Airbnb-Cereal-App-Bold', color: 'white' }}>Store</Text>
-        <Pressable onPress={handleClickCart}>
+        <Pressable onPress={() => { navigation.navigate('Cart') }}>
           <Image source={require('../media/icon_button/bag.png')} style={{ width: 30, height: 30 }} />
         </Pressable>
       </View>
+
       <View style={{ paddingHorizontal: 16 }}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 50 }} >
           <View style={{ flexDirection: 'row', marginTop: 20 }}>
@@ -177,7 +195,7 @@ const Home = (props) => {
               <Text style={{ color: '#1A2530', fontSize: 20, fontFamily: 'Airbnb-Cereal-App-Medium', marginTop: 10 }}>{infoUser.name}</Text>
             </View>
           </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 20 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 20, marginBottom: 10 }}>
             <View style={styles.searchContainer}>
               <TextInput placeholder='Looking for shoes' style={styles.edtSearch} onChangeText={(text) => countDownSearch(text)} />
               <Image source={require('../media/icon_button/search.png')} style={styles.imgSearch} />
@@ -186,6 +204,7 @@ const Home = (props) => {
               <Image style={{ width: 30, height: 30, marginLeft: 20 }} source={require('../media/icon_button/filter.png')} />
             </TouchableOpacity>
           </View>
+          <ImageSwiper />
           <Text style={{ color: '#1A2530', fontSize: 16, lineHeight: 24, fontFamily: 'Airbnb-Cereal-App-Medium', marginTop: 10 }}>Brand</Text>
           <View style={[styles.type, { marginTop: 10 }]}>
             {brands.map((brand) => (
@@ -208,7 +227,6 @@ const Home = (props) => {
               <Text style={{ color: '#1A2530', fontSize: 16, lineHeight: 24, fontFamily: 'Airbnb-Cereal-App-Medium' }}>See all</Text>
             </TouchableOpacity>
           </View>
-          {/* <Image style={styles.banner} source={{ uri: 'https://cdn.dribbble.com/users/4063497/screenshots/14707936/media/bb3c9cc3e171c070e73059ee1a9d0155.png?resize=400x0' }} /> */}
           <View>
             {
               isLoading == true ?
@@ -233,7 +251,10 @@ const Home = (props) => {
           setModalVisible(!modalVisible);
         }}>
         <View style={styles.modalView}>
-          <View style={{ width: 60, height: 5, backgroundColor: '#E9EDEF', borderRadius: 16, alignSelf: 'center' }} />
+          <TouchableOpacity onPress={() => { setModalVisible(false) }}>
+            <View style={{ width: 60, height: 5, backgroundColor: '#E9EDEF', borderRadius: 16, alignSelf: 'center' }} />
+
+          </TouchableOpacity>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 20, justifyContent: 'center' }}>
             <Text style={{ fontSize: 24, lineHeight: 32, fontWeight: '500', color: '#1A2530' }}>Filters</Text>
             <TouchableOpacity style={{ position: 'absolute', right: 0, }} onPress={handleClickReset}>
@@ -288,32 +309,32 @@ const Home = (props) => {
           <Text style={[styles.txtLabel, { marginTop: 15, }]}>Price</Text>
 
           <View style={{ flexDirection: 'row', justifyContent: 'center', }}>
-            <View style={{ margin: 20, borderRadius: 20, width: 150, backgroundColor: '#E9EDEF' }}>
+            <View style={{ margin: 20, borderRadius: 20, width: 155, backgroundColor: '#E9EDEF', paddingHorizontal: 10 }}>
               <Picker
                 mode='dropdown'
                 selectedValue={min}
                 onValueChange={(itemValue, itemIndex) =>
                   setmin(itemValue)
                 }>
-                <Picker.Item label="100$" value="100" />
-                <Picker.Item label="200$" value="200" />
-                <Picker.Item label="300$" value="300" />
-                <Picker.Item label="400$" value="400" />
-                <Picker.Item label="500$" value="500" />
+                <Picker.Item label="100.000đ" value="100000" style={styles.pickerItem} />
+                <Picker.Item label="200.000đ" value="200000" style={styles.pickerItem} />
+                <Picker.Item label="300.000đ" value="300000" style={styles.pickerItem} />
+                <Picker.Item label="400.000đ" value="400000" style={styles.pickerItem} />
+                <Picker.Item label="500.000đ" value="500000" style={styles.pickerItem} />
               </Picker>
             </View>
-            <View style={{ margin: 20, borderRadius: 20, width: 150, backgroundColor: '#E9EDEF' }}>
+            <View style={{ margin: 20, borderRadius: 20, width: 155, backgroundColor: '#E9EDEF', paddingHorizontal: 10 }}>
               <Picker
                 mode='dropdown'
                 selectedValue={max}
                 onValueChange={(itemValue, itemIndex) =>
                   setmax(itemValue)
                 }>
-                <Picker.Item label="600$" value="600" />
-                <Picker.Item label="700$" value="700" />
-                <Picker.Item label="800$" value="800" />
-                <Picker.Item label="900$" value="900" />
-                <Picker.Item label="1000$" value="1000" />
+                <Picker.Item label="600.000đ" value="600000" style={styles.pickerItem} />
+                <Picker.Item label="700.000đ" value="700000" style={styles.pickerItem} />
+                <Picker.Item label="800.000đ" value="800000" style={styles.pickerItem} />
+                <Picker.Item label="900.000đ" value="900000" style={styles.pickerItem} />
+                <Picker.Item label="1.000.000đ" value="1000000" style={styles.pickerItem} />
               </Picker>
             </View>
           </View>
@@ -329,6 +350,28 @@ const Home = (props) => {
 export default Home
 
 const styles = StyleSheet.create({
+  pickerItem: {
+    fontSize: 15,
+    fontFamily: 'Airbnb-Cereal-App-Medium', // Use your desired font family
+    color: '#707B81', // Use your desired font color,
+
+  },
+  swiper: {
+    height: 200,
+  },
+  slide: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  image2: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+    borderRadius: 20,
+  },
+  pagination: {
+    bottom: 10,
+  },
   type: {
     flexDirection: 'row',
     justifyContent: 'space-around',

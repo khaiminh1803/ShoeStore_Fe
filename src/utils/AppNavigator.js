@@ -24,11 +24,12 @@ import DetailOrder from '../components/DetailOrder';
 import History from '../components/History';
 import Voucher from '../components/Voucher';
 import Verifycation from '../components/Verifycation';
+import ChangePassword from '../components/ChangePassword';
+import ResetPassword from '../components/ResetPassword';
 // welcome, login, register stack
 const Stack = createNativeStackNavigator()
 const User = () => {
     return (
-
         <Stack.Navigator initialRouteName='Welcome' screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Welcome" component={Welcome} />
             <Stack.Screen name="Onboard1" component={Onboard1} />
@@ -38,18 +39,10 @@ const User = () => {
             <Stack.Screen name="Register" component={Register} />
             <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
             <Stack.Screen name="Verifycation" component={Verifycation} />
+            <Stack.Screen name="ResetPassword" component={ResetPassword} />
         </Stack.Navigator>
     )
 }
-
-// const Product = () => {
-//     return (
-//         <Stack.Navigator initialRouteName='Home' screenOptions={{ headerShown: false }}>
-//             <Stack.Screen name="Home" component={Home} />
-//             <Stack.Screen name="DetailShoe" component={DetailShoe} />
-//         </Stack.Navigator>
-//     )
-// }
 const Product = ({ navigation, route }) => {
     useLayoutEffect(() => {
         const routeName = getFocusedRouteNameFromRoute(route) ?? "Home";
@@ -60,13 +53,9 @@ const Product = ({ navigation, route }) => {
                 tabBarStyle: {
                     height: 60,
                     position: 'absolute',
-                    borderTopLeftRadius: 30,
-                    borderTopRightRadius: 30,
                     bottom: 0,
                     right: 0,
                     left: 0,
-                    // backgroundColor: '#0099cc'
-
                 }
             });
         }
@@ -79,31 +68,44 @@ const Product = ({ navigation, route }) => {
             <Stack.Screen name="Cart" component={Cart} />
             <Stack.Screen name="Checkout" component={Checkout} />
             <Stack.Screen name="Voucher" component={Voucher} />
+            <Stack.Screen name="Favourite" component={Favourite} />
         </Stack.Navigator>
     );
 };
 
-const Remaining = () => {
+
+
+const Remaining = ({ navigation, route }) => {
+    useLayoutEffect(() => {
+        const routeName = getFocusedRouteNameFromRoute(route) ?? "Setting";
+        if (routeName === "Profile" || routeName === "History" || routeName === "DetailOrder" || routeName === "ChangePassword") {
+            navigation.setOptions({ tabBarStyle: { display: 'none' } });
+        } else {
+            navigation.setOptions({
+                tabBarStyle: {
+                    height: 60,
+                    position: 'absolute',
+                    bottom: 0,
+                    right: 0,
+                    left: 0,
+                }
+            });
+        }
+    }, [navigation, route]);
+
     return (
-        <Stack.Navigator initialRouteName='Setting' screenOptions={{ headerShown: false }}>
+        <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Setting" component={Setting} />
             <Stack.Screen name="Profile" component={Profile} />
             <Stack.Screen name="History" component={History} />
             <Stack.Screen name="DetailOrder" component={DetailOrder} />
             <Stack.Screen name="Login" component={Login} />
-
+            <Stack.Screen name="ChangePassword" component={ChangePassword} />
         </Stack.Navigator>
-    )
-}
+    );
+};
 
-// const Order = () => {
-//     return (
-//         <Stack.Navigator initialRouteName='Favourite' screenOptions={{ headerShown: false }}>
-//             <Stack.Screen name="Favourite" component={Favourite} />
-//             <Stack.Screen name="DetailOrder" component={DetailOrder} />
-//         </Stack.Navigator>
-//     )
-// }
+
 
 const Tab = createBottomTabNavigator()
 //home, cart, bill, profile
@@ -114,12 +116,9 @@ const Main = () => {
                 tabBarStyle: {
                     height: 60,
                     position: 'absolute',
-                    borderTopLeftRadius: 20,
-                    borderTopRightRadius: 20,
                     bottom: 0,
                     right: 0,
                     left: 0,
-                    // backgroundColor: '#0099cc'
                 },
                 headerShown: false,
                 tabBarIcon: ({ focused }) => {
@@ -130,20 +129,6 @@ const Main = () => {
                         } else {
                             return <Image source={require('../media/icon_bottom_tab/home.png')} style={{ width: 24, height: 24 }} />
                         }
-
-                    } else if (route.name === 'Notification') {
-                        if (source = focused) {
-                            return <Image source={require('../media/icon_bottom_tab/noti_active.png')} style={{ width: 24, height: 24 }} />
-                        } else {
-                            return <Image source={require('../media/icon_bottom_tab/noti.png')} style={{ width: 24, height: 24 }} />
-                        }
-                    }
-                    else if (route.name === 'Cart') {
-                        return (
-                        <View style={{ width: 50, height: 50, backgroundColor: '#5b9ee1', borderRadius: 25, justifyContent: 'center', alignItems: 'center', marginBottom: 50 }}>
-                            <Image source={require('../media/icon_bottom_tab/plus.png')} style={{ width: 24, height: 24 }} />
-                        </View>)
-
                     }
                     else if (route.name === 'Favourite') {
                         if (source = focused) {
@@ -164,8 +149,6 @@ const Main = () => {
             })}
         >
             <Tab.Screen name="Product" component={Product} />
-            <Tab.Screen name="Notification" component={Notification} />
-            <Tab.Screen name="Cart" component={Cart} />
             <Tab.Screen name="Favourite" component={Favourite} />
             <Tab.Screen name="Remaining" component={Remaining} />
         </Tab.Navigator>

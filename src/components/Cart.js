@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Pressable, Image, FlatList, ActivityIndicator, ToastAndroid, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, Pressable, Image, FlatList, ActivityIndicator, ToastAndroid, TouchableOpacity, ScrollView } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
 import { AppContext } from '../utils/AppContext'
 import AxiosInstance from '../utils/AxiosIntance'
@@ -9,44 +9,25 @@ import { formatCurrency } from '../utils/GlobalFunction'
 const Cart = (props) => {
   const { navigation } = props
   const { infoUser, dataCart, setdataCart } = useContext(AppContext)
-  // const [dataCart, setdataCart] = useState([])
   const [isLoading, setisLoading] = useState(true)
   const [selectedItems, setselectedItems] = useState({})
   const [billPrice, setbillPrice] = useState(0)
-  const [selectedItemsForCheckout, setSelectedItemsForCheckout] = useState([]);
   const shippingFee = 40000
 
-  const btnCheckout = () => {
-    if (selectedItemsForCheckout.length === 0) {
-      ToastAndroid.show("Please select a shoe", ToastAndroid.SHORT);
-      return;
-    }
-    navigation.navigate('Checkout', { selectedItems: selectedItemsForCheckout, totalPrice: billPrice })
-    console.log(selectedItemsForCheckout);
-
-  }
   useEffect(() => {
     const getCart = async () => {
       // http://localhost:3000/api/products/cart/:id
       const response = await AxiosInstance().get("/products/cart/getAllItems/" + infoUser._id)
       console.log(response)
-      // if (response.result == true) { 
-      //   setdataCart(response.cart.items.reverse())
-      //   setisLoading(false)
-      // } else {
-      //   ToastAndroid.show("Lấy dữ liệu thất bại", ToastAndroid.SHORT)
-      // }
       if (response.cart.item != []) {
         setdataCart(response.cart.items)
         setisLoading(false)
       } else {
-        ToastAndroid.show("Lấy dữ liệu thất bại", ToastAndroid.SHORT)
+        ToastAndroid.show("Get data failed", ToastAndroid.SHORT)
       }
     }
     getCart()
-    return () => {
-    }
-  }, [setdataCart])
+  }, [])
 
   const removeItem = async (itemId) => {
     try {
@@ -56,7 +37,7 @@ const Cart = (props) => {
         setdataCart(response.updatedCart.items);
         setisLoading(false)
       } else {
-        ToastAndroid.show('Xóa sản phẩm thất bại', ToastAndroid.SHORT);
+        ToastAndroid.show('Delete Fail', ToastAndroid.SHORT);
       }
     } catch (error) {
       console.error('Error removing item from cart:', error);
@@ -65,6 +46,8 @@ const Cart = (props) => {
   }
 
   const increaseItemQuantity = async (itemId) => {
+    console.log(itemId);
+    
     try {
       const response = await AxiosInstance().post('/products/cart/increase', { userId: infoUser._id, itemId });
       console.log(response);
@@ -97,55 +80,24 @@ const Cart = (props) => {
   }
 
   const toggleSelectItem = (itemId) => {
-    setselectedItems((prevSelectedItems) => ({
-      ...prevSelectedItems,
-      [itemId]: !prevSelectedItems[itemId],
-    }));
-  };
-
-  const calculateTotalPrice = () => {
-    return dataCart.reduce((total, item) => {
-      if (selectedItems[item._id]) {
-        return total + item.product.price * item.quantity;
-      }
-      return total;
-    }, 0);
-  };
-
-  const updateTotalPrice = async (totalPrice) => {
-    try {
-      const response = await AxiosInstance().post('/products/cart/updateTotalPrice', {
-        userId: infoUser._id,
-        totalPrice,
-        selectedItems
-      });
-      console.log(selectedItems);
-      if (response.result != true) {
-        ToastAndroid.show('Cập nhật tổng giá tiền thất bại', ToastAndroid.SHORT);
-      }
-    } catch (error) {
-      ToastAndroid.show('Lỗi khi cập nhật tổng giá tiền', ToastAndroid.SHORT);
-    }
-  };
+    setselectedItems(prev => ({ ...prev, [itemId]: !prev[itemId] }));
+  }
 
   useEffect(() => {
-    const totalPrice = calculateTotalPrice();
-    console.log(totalPrice);
-    // updateTotalPrice(totalPrice);
-    setbillPrice(totalPrice)
-    // Update selected items for checkout whenever selectedItems changes
-    const selectedItemsArray = [];
-    for (const itemId in selectedItems) {
-      if (selectedItems[itemId]) {
-        const selectedItem = dataCart.find(item => item._id === itemId);
-        if (selectedItem) {
-          selectedItemsArray.push(selectedItem);
-        }
-      }
-    }
-    setSelectedItemsForCheckout(selectedItemsArray);
+    const totalPrice = dataCart.reduce((total, item) => {
+      return selectedItems[item._id] ? total + item.product.price * item.quantity : total;
+    }, 0);
+    setbillPrice(totalPrice);
   }, [selectedItems, dataCart]);
 
+  const handleClickCheckOut = () => {
+    const selectedItemsForCheckout = dataCart.filter(item => selectedItems[item._id]);
+    if (!selectedItemsForCheckout.length) {
+      ToastAndroid.show("Please select a shoe", ToastAndroid.SHORT);
+      return;
+    }
+    navigation.navigate('Checkout', { selectedItems: selectedItemsForCheckout, totalPrice: billPrice });
+  }
 
   return (
     <View style={styles.container}>
@@ -162,8 +114,6 @@ const Cart = (props) => {
         <View style={{ width: 30, height: 30 }}>
         </View>
       </View>
-
-
       {
         isLoading == true ?
           <View style={styles.loading}>
@@ -171,25 +121,26 @@ const Cart = (props) => {
             <Text>Loading....</Text>
           </View>
           :
-          <FlatList
-            data={dataCart}
-            renderItem={({ item }) => <ItemCart dulieu={item}
-              onDelete={() => removeItem(item._id)}
-              onIncrease={() => increaseItemQuantity(item._id)}
-              onDecrease={() => decreaseItemQuantity(item._id)}
-              isSelected={!!selectedItems[item._id]}
-              onSelect={() => toggleSelectItem(item._id)}
-            />}
-            keyExtractor={item => item._id}
-            showsVerticalScrollIndicator={false}
-            style={{ marginTop: 3, height: 450 }}
-          />
+          <ScrollView contentContainerStyle={{ paddingBottom: 250 }}>
+            {dataCart.map(item => (
+              <ItemCart
+                key={item._id}
+                dulieu={item}
+                onDelete={() => removeItem(item._id)}
+                onIncrease={() => increaseItemQuantity(item._id)}
+                onDecrease={() => decreaseItemQuantity(item._id)}
+                isSelected={!!selectedItems[item._id]}
+                onSelect={() => toggleSelectItem(item._id)}
+              />
+            ))}
+          </ScrollView>
       }
 
       <View style={styles.popup}>
         <View style={styles.viewSubtotal}>
-          <Text style={styles.txtSubtotal}>Subtotal</Text>
-          <Text style={styles.txtCost1}>{formatCurrency(calculateTotalPrice())}</Text>
+          <Text style={styles.txtSubtotal} onPress={() => {console.log(selectedItems);
+          }}>Subtotal</Text>
+          <Text style={styles.txtCost1}>{formatCurrency(billPrice)}</Text>
         </View>
         <View style={styles.viewShopping}>
           <Text style={styles.txtSubtotal}>Shipping Fee</Text>
@@ -198,9 +149,9 @@ const Cart = (props) => {
         <Image source={require('../media/icon_button/line.png')} style={{ marginTop: 20 }} />
         <View style={styles.viewTotalcost}>
           <Text style={styles.txtTotalCost}>Total Cost</Text>
-          <Text style={styles.txtCost3}>{formatCurrency((calculateTotalPrice() + shippingFee))}</Text>
+          <Text style={styles.txtCost3}>{formatCurrency((billPrice + shippingFee))}</Text>
         </View>
-        <Pressable style={styles.btnSubmit} onPress={btnCheckout} >
+        <Pressable style={styles.btnSubmit} onPress={handleClickCheckOut} >
           <Text style={styles.btnSubmitLabel}>Checkout</Text>
         </Pressable>
       </View>

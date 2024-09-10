@@ -73,7 +73,7 @@ const ButtonLoginGoogle = () => {
   return (
     <Pressable style={styles.btnGoogle} onPress={_signIn}>
       <Image source={require('../../media/icon_button/google.png')} />
-      <Text style={styles.btnGoogleLabel}>Sign in with google</Text>
+      <Text style={styles.btnGoogleLabel}>Sign in with Google</Text>
     </Pressable>
   );
 };
@@ -82,7 +82,7 @@ export default ButtonLoginGoogle;
 
 const styles = StyleSheet.create({
   btnGoogle: {
-    borderWidth: 0.1,
+    // borderWidth: 0.1,
     marginTop: 30,
     borderRadius: 25,
     backgroundColor: '#ffffff',
@@ -90,6 +90,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    elevation: 3
   },
   btnGoogleLabel: {
     marginStart: 5,

@@ -16,12 +16,11 @@ import RNMomosdk from 'react-native-momosdk';
 const Checkout = (props) => {
     const { navigation, route } = props
     const { params } = route
-    const { infoUser, dataOrder, setdataOrder, selectedVoucher, setselectedVoucher } = useContext(AppContext)
+    const { infoUser, setdataOrder, selectedVoucher, setselectedVoucher } = useContext(AppContext)
     const [address, setAddress] = useState(infoUser.address);
     const [addressProvince, setaddressProvince] = useState("Tp. Hồ Chí Minh")
     const [email, setEmail] = useState(infoUser.email);
     const [phonenumber, setPhoneNumber] = useState(infoUser.phonenumber);
-    // const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cod');
     const [isModalVisible, setisModalVisible] = useState(false);
     const dataNe = params?.selectedItems
     const payment = ["Momo", "Cash"]
@@ -29,7 +28,6 @@ const Checkout = (props) => {
     const subtotalPrice = params.totalPrice
     let shippingFee = addressProvince ? (addressProvince === 'Tp. Hồ Chí Minh' ? 40000 : 60000) : 0;
 
-    // const shippingFee = 40000
     const voucherCode = selectedVoucher?.code || '';
     const voucherValue = selectedVoucher?.value || 0;
     const voucherId = selectedVoucher?._id || null;
@@ -37,7 +35,7 @@ const Checkout = (props) => {
     const totalPrice = subtotalPrice + shippingFee - voucherValue
 
     // momo
-    const merchantname = "CGV Cinemas";
+    const merchantname = "Oxy Shoes Store";
     const merchantcode = "CGV01";
     const merchantNameLabel = "Nhà cung cấp";
     const billdescription = "Thanh toán hóa đơn";
@@ -87,7 +85,6 @@ const Checkout = (props) => {
 
     const handleSelectedPayment = (paymentname) => {
         console.log("Selected payment:", paymentname);
-        console.log("clickne");
         setpaymentMethod(paymentname)
     }
     const handleClickPickVoucher = () => {
@@ -97,16 +94,10 @@ const Checkout = (props) => {
 
     const handleCreateOrder = async () => {
         console.log(infoUser._id, email, phonenumber, address, dataNe, paymentMethod, totalPrice, voucherId);
-        if(phonenumber === 'Chưa cập nhật' || address === 'Chưa cập nhật') {
-            ToastAndroid.show("Nhập đầy đủ thông tin", ToastAndroid.SHORT)
-            return
-        }
         try {
             const response = await AxiosInstance().post("/products/order", { userId: infoUser._id, email: email, phonenumber: phonenumber, shippingAddress: address, selectedItems: dataNe, paymentMethod: paymentMethod, totalPrice: totalPrice, voucherId: voucherId })
             console.log(response)
             if (response.result == true) {
-                ToastAndroid.show("Thanh toán thành công", ToastAndroid.SHORT)
-                // setdataOrder([...dataOrder, response.order]); // Thêm order mới vào dataOrder
                 setdataOrder(prevOrders => [...prevOrders, response.order]);
                 setselectedVoucher(null)
                 changeModalVisible(true)
@@ -118,6 +109,10 @@ const Checkout = (props) => {
 
 
     const handleClickCheckout = async () => {
+        if(phonenumber === 'Chưa cập nhật' || address === 'Chưa cập nhật') {
+            ToastAndroid.show("Nhập đầy đủ thông tin", ToastAndroid.SHORT)
+            return
+        }
         if (!paymentMethod) {
             ToastAndroid.show("Select a payment method, please", ToastAndroid.SHORT);
             return;
@@ -134,7 +129,6 @@ const Checkout = (props) => {
             }
         }
     }
-
 
     return (
         <View style={styles.container}>
@@ -266,7 +260,6 @@ const Checkout = (props) => {
                         ))
                     }
                 </View>
-                {/* <Text style={{ textAlign: 'center', marginBottom: 10, marginTop: 10 }}>Phương thức thanh toán khác</Text> */}
                 <Pressable style={styles.btnSubmit} onPress={handleClickCheckout} >
                     <Text style={styles.btnSubmitLabel}>Payment - {totalPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })} </Text>
                     <Modal transparent={true}
@@ -387,7 +380,7 @@ const styles = StyleSheet.create({
     },
     edtAddress: {
         color: '#707B81',
-        fontSize: 12,
+        fontSize: 14,
         lineHeight: 16,
         fontWeight: '400',
         fontFamily: 'Airbnb-Cereal-App-Medium',

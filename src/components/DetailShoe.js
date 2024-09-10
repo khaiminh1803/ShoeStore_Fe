@@ -3,7 +3,7 @@ import React, { useEffect, useState, useContext } from 'react'
 import AxiosInstance from '../utils/AxiosIntance'
 import { AppContext } from '../utils/AppContext';
 import { formatCurrency } from '../utils/GlobalFunction'
-
+import Swiper from 'react-native-swiper';
 
 const DetailShoe = (props) => {
   const { navigation, route } = props
@@ -19,7 +19,7 @@ const DetailShoe = (props) => {
   const [imgActive, setimgActive] = useState(0)
   const { infoUser, setdataCart } = useContext(AppContext)
   const [selectedSize, setselectedSize] = useState(null)
- 
+
   useEffect(() => {
     const getDetail = async () => {
       console.log(params.id);
@@ -35,33 +35,31 @@ const DetailShoe = (props) => {
         setsizes(response.productDetail.sizes)
         setisLoading(false)
       } else {
-        ToastAndroid.show("Lấy dữ liệu thất bại", ToastAndroid.SHORT)
+        ToastAndroid.show("Get data failed", ToastAndroid.SHORT)
       }
     }
     getDetail()
-    return () => {
-
-    }
   }, [])
 
   const clickSize = (size) => {
-    console.log("Selected size:", size);
-    setselectedSize(size)
+    if (selectedSize == size) {
+      setselectedSize(null)
+    } else {
+      setselectedSize(size)
+    }
   }
-
 
   const addToCart = async () => {
     if (!selectedSize) {
       ToastAndroid.show("Please select a size", ToastAndroid.SHORT);
       return;
     }
-  
     try {
       // http://localhost:3000/api/products/cart/addToCart
       const response = await AxiosInstance().post("/products/cart/addToCart", { userId: infoUser._id, productId: params.id, sizeSelected: selectedSize })
       console.log(response);
       if (response.result == true) {
-        ToastAndroid.show("Thêm sản phẩm thành công", ToastAndroid.SHORT);
+        ToastAndroid.show("Add succesfully", ToastAndroid.SHORT);
         setdataCart(response.cartItem.items)
         navigation.navigate('Cart')
       } else {
@@ -73,19 +71,6 @@ const DetailShoe = (props) => {
 
   }
 
-  const onchange = (nativeEvent) => {
-    if (nativeEvent) {
-      const slide = Math.ceil(nativeEvent.contentOffset.x / nativeEvent.layoutMeasurement.width)
-      if (slide != imgActive) {
-        setimgActive(slide)
-      }
-    }
-  }
-
-  const nvgCart = () => {
-    navigation.navigate('Cart')
-  }
-
   return (
     isLoading == true ?
       <View style={styles.loading}>
@@ -95,50 +80,43 @@ const DetailShoe = (props) => {
       :
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => {navigation.navigate('Home')}}>
+          <TouchableOpacity onPress={() => { navigation.navigate('Home') }}>
             <Image source={require('../media/icon_button/arrow.png')}
               style={{ width: 30, height: 30 }} />
           </TouchableOpacity>
           <Text style={{
             textAlign: 'center', fontFamily: 'Airbnb Cereal App'
-            , fontSize: 20, 
+            , fontSize: 20,
             color: 'white', fontWeight: 'bold'
-          }}>Men's Shoes</Text>
-          <Pressable onPress={nvgCart} >
+          }}>{category.name}'s Shoe</Text>
+          <Pressable onPress={() => { navigation.navigate('Cart') }} >
             <Image source={require('../media/icon_button/bag.png')}
               style={{ width: 30, height: 30 }} />
           </Pressable>
         </View>
-        <View style={styles.wrap}>
-          <ScrollView
-            onScroll={({ nativeEvent }) => onchange(nativeEvent)}
-            showsHorizontalScrollIndicator={false}
-            pagingEnabled
-            horizontal
-            style={styles.wrap}
-          >
-            {
-              imageUrl.map((e, index) =>
-                <Image
-                  key={e}
-                  style={styles.wrap}
-                  source={{ uri: e }}
-                />
-              )
-            }
-          </ScrollView>
+        
+        <View style={{
+          paddingHorizontal: 10,
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: 220,
+        }}>
+          <Swiper
+            style={styles.swiper}
+            // autoplay={true}
+            // autoplayTimeout={2}
+            // showsPagination={false}
+            paginationStyle={styles.pagination}
+            loop={true}>
+            {imageUrl.map((image, index) => (
+              <View key={index} style={styles.slide}>
+                <Image source={{ uri: image }} style={styles.image} />
+              </View>
+            ))}
+          </Swiper>
         </View>
-        <View style={styles.wrapDot}>
-          {
-            imageUrl.map((e, index) =>
-              <Text
-                key={e}
-                style={imgActive == index ? styles.dotActive : styles.dot}
-              >●</Text>
-            )
-          }
-        </View>
-        <View style={{paddingHorizontal: 16}}>
+
+        <View style={{ paddingHorizontal: 16 }}>
           <Text style={styles.category}>BEST SELLER</Text>
           <Text style={styles.name}>{name}</Text>
           <Text style={styles.price}>{formatCurrency(price)}</Text>
@@ -146,41 +124,34 @@ const DetailShoe = (props) => {
         </View>
         <Text style={styles.gallery}>Gallery</Text>
         <View style={styles.viewGallery}>
-          {/* <Image style={styles.galleryImage} source={{ uri: imageUrl[1] }} />
-          <Image style={styles.galleryImage} source={{ uri: imageUrl[2] }} />
-          <Image style={styles.galleryImage} source={{ uri: imageUrl[3] }} /> */}
-
           {
             imageUrl.map((item, index) => (
               <Image
                 key={item}
                 style={styles.galleryImage}
                 source={{ uri: item }}
-
               />
             ))
           }
         </View>
         <Text style={[styles.gallery, { marginTop: 20 }]}>Size</Text>
         <View style={styles.viewSize}>
-          {/* <Text style={styles.size}>{sizes[0].size}</Text>
-          <Text style={styles.size}>{sizes[1].size}</Text>
-          <Text style={styles.size}>{sizes[2].size}</Text>
-          <Text style={styles.size}>{sizes[3].size}</Text>
-          <Text style={styles.size}>{sizes[4].size}</Text> */}
           {
             sizes.map((item, index) => (
               <TouchableOpacity
                 key={index}
-                onPress={() => clickSize(item.size)}
+                onPress={() => (item.quantity > 0 ? clickSize(item.size) : null)}
                 style={[
                   styles.size,
-                  selectedSize && selectedSize === item.size && styles.sizeActive
+                  selectedSize && selectedSize === item.size && styles.sizeActive,
+                  item.quantity === 0 && styles.sizeOutOfStock
                 ]}
               >
                 <Text style={[
                   styles.txtSize,
-                  selectedSize && selectedSize === item.size && styles.txtSizeActive
+                  selectedSize && selectedSize === item.size && styles.txtSizeActive,
+                  item.quantity === 0 && styles.txtOutOfStock
+
                 ]}>{item.size}</Text>
               </TouchableOpacity>
             ))
@@ -195,8 +166,6 @@ const DetailShoe = (props) => {
             <Text style={styles.btnLoginLabel}>Add to cart</Text>
           </Pressable>
         </View>
-
-
       </View>
   )
 }
@@ -204,6 +173,32 @@ const DetailShoe = (props) => {
 export default DetailShoe
 
 const styles = StyleSheet.create({
+  txtOutOfStock: {
+    color: 'white'
+  },
+  sizeOutOfStock: {
+    backgroundColor: 'red',
+  },
+  swiper: {
+    height: 220,
+    marginTop: 10
+
+  },
+  slide: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  image: {
+    marginTop: 10,
+    width: 350,
+    height: 220,
+    alignSelf: 'center',
+    borderRadius: 10,
+    resizeMode: 'cover'
+  },
+  pagination: {
+    bottom: 10,
+  },
   dot: {
     margin: 3,
     color: 'white'
@@ -225,7 +220,7 @@ const styles = StyleSheet.create({
     height: 220,
     alignSelf: 'center',
     borderRadius: 10,
-    // resizeMode: 'cover'
+    resizeMode: 'cover'
   },
   loading: {
     flex: 1,
@@ -262,7 +257,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 30, 
+    marginTop: 30,
     paddingHorizontal: 16
   },
   sizeActive: {

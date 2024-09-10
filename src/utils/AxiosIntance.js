@@ -1,6 +1,6 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-export const ip = '192.168.1.113';
+export const ip = '10.82.24.230';
 
 const customAxios = (contentType = 'application/json') => {
     const axiosInstance = axios.create({

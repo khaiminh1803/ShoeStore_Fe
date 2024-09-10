@@ -3,20 +3,26 @@ import React from 'react'
 import { formatCurrency } from '../../utils/GlobalFunction'
 
 const ItemFavourite = (props) => {
-  const { dulieu } = props
+  const { dulieu, onDelete, navigation  } = props
+  const clickItem = () => {
+    navigation.navigate('DetailShoe', { id: dulieu?.productId._id })
+    // console.log(dulieu.productId._id);
+    
+}
   return (
-    <TouchableOpacity>
+    <TouchableOpacity onPress={clickItem}>
       <View style={styles.container}>
         <Image source={{ uri: dulieu.productId.image[0] }}
           style={styles.imgShoe} />
-
         <View style={styles.detailShoe}>
           <Text style={styles.sex}>Man</Text>
-          <Text style={styles.name}>{dulieu.productId.name}</Text>
+          <Text numberOfLines={1} style={styles.name}>{dulieu.productId.name}</Text>
           <View style={styles.viewRow}>
             <Text style={styles.name}>{formatCurrency(dulieu.productId.price)}</Text>
-            <Image source={require('../../media/icon_button/heartred.png')}
-              style={styles.imgHeart} />
+            <TouchableOpacity onPress={onDelete}>
+              <Image source={require('../../media/icon_button/heartred.png')}
+                style={styles.imgHeart} />
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -66,6 +72,7 @@ const styles = StyleSheet.create({
     height: 185,
     borderRadius: 16,
     backgroundColor: '#ffffff',
-    marginBottom: 10
+    marginBottom: 10,
+    elevation: 2
   }
 })

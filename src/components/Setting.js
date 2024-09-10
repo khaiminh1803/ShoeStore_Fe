@@ -72,7 +72,7 @@ const Setting = (props) => {
                             source={require('../media/icon_button/alert.png')}
                             style={styles.btnImg}
                         />
-                        <Text>Alerts</Text>
+                        <Text style={styles.textItem}>Alerts</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.module}>
@@ -81,44 +81,45 @@ const Setting = (props) => {
                             source={require('../media/icon_button/editprofile.png')}
                             style={styles.btnImg}
                         />
-                        <Text>Edit Profile</Text>
+                        <Text style={styles.textItem}>Edit profile</Text>
+
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.item}>
                         <Image
                             source={require('../media/icon_button/paymentdata.png')}
                             style={styles.btnImg}
                         />
-                        <Text>Payment</Text>
+                        <Text style={styles.textItem}>Payment</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.item} onPress={() => { navigation.navigate('History') }}>
                         <Image
                             source={require('../media/icon_button/contact.png')}
                             style={styles.btnImg}
                         />
-                        <Text>History</Text>
+                        <Text style={styles.textItem}>History</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.module}>
-                    <TouchableOpacity style={styles.item}>
+                    <TouchableOpacity style={styles.item} onPress={() => {navigation.navigate('ChangePassword')}}>
                         <Image
                             source={require('../media/icon_button/privacy.png')}
                             style={styles.btnImg}
                         />
-                        <Text>Privacy</Text>
+                        <Text style={styles.textItem}>Change Password</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.item}>
                         <Image
                             source={require('../media/icon_button/safety.png')}
                             style={styles.btnImg}
                         />
-                        <Text>Safety</Text>
+                        <Text style={styles.textItem}>Safety</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.item}>
                         <Image
                             source={require('../media/icon_button/authen.png')}
                             style={styles.btnImg}
                         />
-                        <Text>Two-Factor Authentication</Text>
+                        <Text style={styles.textItem}>Two-Factor Authentication</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.module}>
@@ -127,35 +128,39 @@ const Setting = (props) => {
                             source={require('../media/icon_button/theme.png')}
                             style={styles.btnImg}
                         />
-                        <Text>Theme</Text>
+                        <Text style={styles.textItem}>Theme</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.item}>
                         <Image
                             source={require('../media/icon_button/switchAcc.png')}
                             style={styles.btnImg}
                         />
-                        <Text>Switch Account</Text>
+
+                        <Text style={styles.textItem}>Switch Account</Text>
+
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.item}>
                         <Image
                             source={require('../media/icon_button/addacc.png')}
                             style={styles.btnImg}
                         />
-                        <Text>Add New Account</Text>
+                        <Text style={styles.textItem}>Add New Account</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.item}>
                         <Image
                             source={require('../media/icon_button/help.png')}
                             style={styles.btnImg}
                         />
-                        <Text>Help</Text>
+                        <Text style={styles.textItem}>Help</Text>
+
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.item} onPress={handleClickLogout}>
                         <Image
                             source={require('../media/icon_button/logout.png')}
                             style={styles.btnImg}
                         />
-                        <Text>Log Out</Text>
+                        <Text style={styles.textItem}>Log Out</Text>
+
                     </TouchableOpacity>
                 </View>
                 <View>
@@ -207,12 +212,29 @@ const styles = StyleSheet.create({
         height: 80,
         width: 80
     },
+    textItem: {
+        fontFamily: 'Airbnb-Cereal-App-Medium',
+    },
+    adress: {
+        fontSize: 16,
+        fontWeight: '500',
+        fontFamily: 'Airbnb-Cereal-App-Medium',
+    },
+    email: {
+        fontSize: 16,
+        fontWeight: '300',
+        color: '#1A2530',
+        fontFamily: 'Airbnb-Cereal-App-Low',
+        marginBottom: 2
+    },
     name: {
         fontSize: 20,
         fontWeight: '500',
         lineHeight: 28,
         color: '#1A2530',
-        marginBottom: 8
+        marginBottom: 8,
+        fontFamily: 'Airbnb-Cereal-App-Medium',
+
     },
     button: {
         width: '100%',

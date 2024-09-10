@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Pressable, Image, TextInput, ToastAndroid, TouchableHighlight, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, Pressable, Image, TextInput, ToastAndroid, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
 import AxiosInstance from '../utils/AxiosIntance'
 
@@ -10,31 +10,26 @@ const Register = (props) => {
   const [nameUser, setnameUser] = useState("")
   const [confirmPassword, setconfirmPassword] = useState("")
 
-
-  const handleClickLogin = () => {
-    navigation.navigate('Login')
-  }
-
   const validateForm = () => {
     if (!nameUser.trim()) {
-      ToastAndroid.show("Tên không được để trống", ToastAndroid.SHORT);
+      ToastAndroid.show("Name cannot be blank", ToastAndroid.SHORT);
       return false;
     }
 
     const emailRegex = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
     if (!emailRegex.test(emailUser)) {
-      ToastAndroid.show("Email không đúng định dạng", ToastAndroid.SHORT);
+      ToastAndroid.show("Email is not in correct format", ToastAndroid.SHORT);
       return false;
     }
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/;
     if (!passwordRegex.test(passwordUser)) {
-      ToastAndroid.show("Mật khẩu phải có ít nhất 8 ký tự, chữ hoa, chữ thường, số và ký tự đặc biệt", ToastAndroid.SHORT);
+      ToastAndroid.show("Password must have at least 8 characters, uppercase letters, lowercase letters, numbers and special characters", ToastAndroid.SHORT);
       return false;
     }
 
     if (passwordUser !== confirmPassword) {
-      ToastAndroid.show("Mật khẩu không khớp", ToastAndroid.SHORT);
+      ToastAndroid.show("Passwords do not match", ToastAndroid.SHORT);
       return false;
     }
 
@@ -52,23 +47,23 @@ const Register = (props) => {
       const response = await AxiosInstance().post("/users/register", { email: emailUser, password: passwordUser, name: nameUser, confirm_password: confirmPassword })
       console.log(response)
       if (response.result == true) {
-        ToastAndroid.show("Đăng ký thành công", ToastAndroid.SHORT)
+        ToastAndroid.show("Register successfully", ToastAndroid.SHORT)
         navigation.navigate("Verifycation", { email: emailUser })
       } else {
-        ToastAndroid.show("Đăng ký thất bại", ToastAndroid.SHORT)
+        ToastAndroid.show("Register fail", ToastAndroid.SHORT)
       }
     } catch (error) {
       // console.log(e);
       if (error && error.response.status === 400) {
-        ToastAndroid.show("Đăng ký thất bại", ToastAndroid.SHORT)
+        ToastAndroid.show("Register fail", ToastAndroid.SHORT)
       }
     }
 
   }
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => {navigation.goBack()}}>
-      <Image source={require('../media/icon_button/back.png')} />
+      <TouchableOpacity onPress={() => { navigation.goBack() }}>
+        <Image source={require('../media/icon_button/back.png')} />
 
       </TouchableOpacity>
       <View style={styles.header}>
@@ -97,7 +92,10 @@ const Register = (props) => {
           />
         </View>
       </View>
-      <Text style={[{ textAlign: 'right' }, { marginTop: 10 }, { fontSize: 14 }]}>Forgot Password</Text>
+      <TouchableOpacity style={{ marginTop: 10}} onPress={() => { navigation.navigate('ForgotPassword') }}>
+        <Text style={{ textAlign: 'right', fontFamily: 'Airbnb-Cereal-App-Bold', fontSize: 14 }}>
+          Forgot Password</Text>
+      </TouchableOpacity>
       <Pressable style={styles.btnLoginBorder} onPress={handleClickRegister}>
         <Text style={styles.btnLoginLabel}>Sign Up</Text>
       </Pressable>
@@ -107,7 +105,7 @@ const Register = (props) => {
       </Pressable>
       <View style={styles.footer}>
         <Text style={styles.footer1}>Already Have An Account?</Text>
-        <Pressable onPress={handleClickLogin}>
+        <Pressable onPress={() => { navigation.navigate('Login') }}>
           <Text style={styles.footer2}>Sign in</Text>
         </Pressable>
       </View>
